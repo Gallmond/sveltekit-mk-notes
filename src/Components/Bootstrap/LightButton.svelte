@@ -1,0 +1,1 @@
+<button type="button" class="btn btn-secondary btn-sm" on:click><slot></slot></button>

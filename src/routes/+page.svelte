@@ -15,6 +15,7 @@
     }
     .right-container{
         flex: 8;
+        display: flex;
     }
 
     .wrapper{
