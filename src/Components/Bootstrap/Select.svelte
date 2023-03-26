@@ -8,7 +8,7 @@
     {#if label !== ''}
         <label class="input-group-text" for="select">{label}</label>
     {/if}
-    <select class="form-select" aria-label="Default select example" id="select-component">
+    <select on:change class="form-select" aria-label="Default select example" id="select-component">
         {#each Object.entries(values) as keyVal, i}
             {#if keyVal[0] === selected}
                 <option value="{keyVal[0]}" selected>{keyVal[1]}</option>    

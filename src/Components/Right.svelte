@@ -5,23 +5,21 @@
 
     let contentContainerState = 0
 
-    let markedOutputDiv: HTMLDivElement
+    // const TEMP = new Array(30).fill('This is some text').join('<br><br>\r\n')
 
-    const TEMP = new Array(30).fill('This is some text').join('<br><br>\r\n')
+    let inputText = ''
+    let generatedMarkdown = ''
 
-    let inputText = TEMP
-
-    $:{
-        markedOutputDiv && (markedOutputDiv.innerHTML = marked(inputText))
-    }
+    $: generatedMarkdown = marked(inputText)
 
     let textAreaElement: HTMLTextAreaElement
 
     /**
-     * when focused in the text area, tabs should add a tab character instead
+     * when focused in the text area, tabs should add four spaces instead
      * of iterating to the next input element
     */
     onMount(() => {
+
         textAreaElement.addEventListener('keydown', (e) => {
             if(e.key !== 'Tab') return
 
@@ -63,14 +61,15 @@
 
         {#if [0,1].includes(contentContainerState) }
             <div class="markdown-editor">
-                <textarea bind:this={textAreaElement} bind:value={inputText} placeholder="text here"></textarea>
+                <textarea class="text-input" bind:this={textAreaElement} bind:value={inputText} placeholder="text here"></textarea>
             </div>
         {/if}
 
         {#if [0,2].includes(contentContainerState) }
             <div class="markdown-preview">
-                <!-- TODO scrollbar not working here -->
-                <div class="markdown-output" bind:this={markedOutputDiv}></div>
+                <div class="markdown-output">
+                    {@html generatedMarkdown}
+                </div>
             </div>
         {/if}
     </div>
@@ -78,42 +77,17 @@
 
 <style>
 
-    .markdown-output{
-        flex: 1;
-        overflow-y: scroll;
-    }
-
-    .markdown-editor > textarea{
-        flex: 1;
-        border: 0px;
-        resize: none;
-        background-color: transparent;
-        font-family: 'Courier New', Courier, monospace;
-    }
-
-    .markdown-editor{
+    .wrapper{
         display: flex;
-        padding: 1em;
-        background-color: #e9ecef;
-    }
-
-    .markdown-preview{
-        padding: 1em;
-        display: flex;
-    }
-
-    .markdown-editor, .markdown-preview{
         flex: 1;
-    }
-
-    .content-container{
-        display: flex;
-        flex-direction: row;
-        flex: 1;
+        flex-direction: column;
     }
 
     .top-bar{
         padding: 4px;
+
+        height: fit-content;
+
         border-bottom: 1px solid black;
 
         display: flex;
@@ -121,9 +95,45 @@
         justify-content: space-between;
     }
 
-    .wrapper{
-        display: flex;
+    .content-container{
         flex: 1;
-        flex-direction: column;
+
+        min-height: 1px;
+
+        display: flex;
+        flex-direction: row;
     }
+
+    .markdown-editor{
+        flex: 1;
+        background-color: rgb(197, 197, 197);
+
+        display: flex;
+    }
+
+    .markdown-preview{
+        flex: 1;
+
+        display: flex;
+    }
+
+    .markdown-output{
+        flex: 1;
+
+        overflow-y: scroll;
+        padding: 1em;
+    }
+
+    .text-input{
+        flex: 1;
+
+        padding: 1em;
+        border: 0px;
+        resize: none;
+        background-color: transparent;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+
+
 </style>
