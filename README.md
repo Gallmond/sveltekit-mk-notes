@@ -1,6 +1,13 @@
 # Notes
 
 ## TODO
+- make tags editor look nice
+- notification popups
+- settings modal
+- account modal
+
+- PLAN FUNCTIONALITY
+
 
 ## Data
 

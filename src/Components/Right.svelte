@@ -1,7 +1,9 @@
 <script lang="ts">
-	import LightButton from "./Bootstrap/LightButton.svelte";
+	import LightButton from "./Bootstrap/LightButton.svelte"
+    import SmallInput from "./Bootstrap/SmallInput.svelte"
     import {marked} from 'marked'
     import { onMount } from "svelte";
+	import Badge from "./Bootstrap/Badge.svelte";
 
     let contentContainerState = 0
 
@@ -37,18 +39,58 @@
         })
     })
 
+
+    let newTagInput = ''
+    let tagsActive = false
+    let tags = [ 'birthday', 'recipe', 'note']
+    const addTag = (tag:string) => {
+        tags = [...tags, tag]
+    }
+    const deleteTag = (tag: string) => {
+        const index = tags.indexOf(tag)
+        
+        if(index === -1) return
+
+        tags.splice(index, 1)
+        tags = tags
+    }
+
+
 </script>
 
 <div class="wrapper">
 
     <div class="top-bar">
         <div class="top-left">
-            <LightButton on:click={() => {
-                contentContainerState = (contentContainerState + 1) % 3
-            }}>✏️/👁️</LightButton>  
-            <LightButton>🏷️</LightButton>  
-            <LightButton>📌</LightButton>  
-            <LightButton>🗑️</LightButton> 
+            <div class="buttons-container">
+                <LightButton on:click={() => {
+                    contentContainerState = (contentContainerState + 1) % 3
+                }}>✏️/👁️</LightButton>  
+                <LightButton on:click={() => {tagsActive = !tagsActive}}>🏷️</LightButton>  
+                <LightButton>📌</LightButton>  
+                <LightButton>🗑️</LightButton> 
+            </div>
+
+            {#if tagsActive}
+            <div>
+
+                <SmallInput 
+                    label={'add'}
+                    bind:value={newTagInput}
+                    on:click={() => {
+                        if(newTagInput === '') return
+                        addTag( newTagInput )
+                        newTagInput = ''
+                    }}    
+                />
+
+                {#each tags as tag, i}
+                    <Badge on:click={()=>{ deleteTag(tag) }}>{tag}</Badge>    
+                {/each}
+
+            </div>
+            {/if}
+
         </div>
         
         <div class="top-right">
