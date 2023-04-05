@@ -1,118 +1,94 @@
 <script lang="ts">
 	import LightButton from "./Bootstrap/LightButton.svelte"
-    import SmallInput from "./Bootstrap/SmallInput.svelte"
     import {marked} from 'marked'
-    import { onMount } from "svelte";
-	import Badge from "./Bootstrap/Badge.svelte";
+	import Tags from "./Tags.svelte";
+	import MarkdownEditor from "./MarkdownEditor.svelte";
+	import MarkdownPreview from "./MarkdownPreview.svelte";
+	import Settings from "./Settings.svelte";
+	import Account from "./Account.svelte";
 
     let contentContainerState = 0
-
-    // const TEMP = new Array(30).fill('This is some text').join('<br><br>\r\n')
-
+    
     let inputText = ''
     let generatedMarkdown = ''
 
-    $: generatedMarkdown = marked(inputText)
+    $:{
+        generatedMarkdown = marked(inputText)
+        inputTextChanged(inputText)
+    } 
 
-    let textAreaElement: HTMLTextAreaElement
+    const togglePin = () => console.log('togglePin')
+    const sendToTrash = () => console.log('sendToTrash')
 
-    /**
-     * when focused in the text area, tabs should add four spaces instead
-     * of iterating to the next input element
-    */
-    onMount(() => {
+    const inputTextChanged = (text: string) => {
+        console.log('inputTextChanged', {text})
+    }
 
-        textAreaElement.addEventListener('keydown', (e) => {
-            if(e.key !== 'Tab') return
-
-            e.preventDefault()
-            
-            const start = textAreaElement.selectionStart
-            const end = textAreaElement.selectionEnd
-
-            const prefix = textAreaElement.value.substring(0, start)
-            const suffix = textAreaElement.value.substring(end)
-
-            textAreaElement.value = `${prefix}    ${suffix}`
-
-            textAreaElement.selectionStart = textAreaElement.selectionEnd = start + 1
-        })
-    })
-
-
-    let newTagInput = ''
     let tagsActive = false
     let tags = [ 'birthday', 'recipe', 'note']
-    const addTag = (tag:string) => {
-        tags = [...tags, tag]
-    }
-    const deleteTag = (tag: string) => {
-        const index = tags.indexOf(tag)
-        
-        if(index === -1) return
-
-        tags.splice(index, 1)
-        tags = tags
+    const tagsChanged = (tags: Tag[]) => {
+        console.log('tags have changed', {tags})
     }
 
+    let showSettings = false // TEMP
+    const toggleSettings = () => {
+        showAccount = false
+        showSettings = !showSettings
+    }
+
+    let showAccount = true
+    const toggleAccount = () => {
+        showSettings = false
+        showAccount = !showAccount
+    }
 
 </script>
 
 <div class="wrapper">
 
     <div class="top-bar">
-        <div class="top-left">
+        
+        <div class="buttons-bar">
             <div class="buttons-container">
                 <LightButton on:click={() => {
                     contentContainerState = (contentContainerState + 1) % 3
                 }}>✏️/👁️</LightButton>  
-                <LightButton on:click={() => {tagsActive = !tagsActive}}>🏷️</LightButton>  
-                <LightButton>📌</LightButton>  
-                <LightButton>🗑️</LightButton> 
+                <LightButton active={tagsActive} on:click={() => {tagsActive = !tagsActive}}>🏷️</LightButton>  
+                <LightButton on:click={togglePin}>📌</LightButton>  
+                <LightButton on:click={sendToTrash}>🗑️</LightButton> 
             </div>
+        
+            <div class="buttons-container">
+                <LightButton active={showSettings} on:click={toggleSettings}>⚙️</LightButton>  
+                <LightButton active={showAccount} on:click={toggleAccount}>👤</LightButton>  
+            </div>
+        </div>
 
+
+        <div class="utility-bar">
             {#if tagsActive}
-            <div>
-
-                <SmallInput 
-                    label={'add'}
-                    bind:value={newTagInput}
-                    on:click={() => {
-                        if(newTagInput === '') return
-                        addTag( newTagInput )
-                        newTagInput = ''
-                    }}    
-                />
-
-                {#each tags as tag, i}
-                    <Badge on:click={()=>{ deleteTag(tag) }}>{tag}</Badge>    
-                {/each}
-
-            </div>
+                <Tags tags={tags} onChange={tagsChanged} />
             {/if}
-
         </div>
         
-        <div class="top-right">
-            <LightButton>⚙️</LightButton>  
-            <LightButton>👤</LightButton>  
-        </div>
     </div>
 
     <div class="content-container">
 
-        {#if [0,1].includes(contentContainerState) }
-            <div class="markdown-editor">
-                <textarea class="text-input" bind:this={textAreaElement} bind:value={inputText} placeholder="text here"></textarea>
-            </div>
+        {#if showAccount && !showSettings}
+            <Account />
         {/if}
 
-        {#if [0,2].includes(contentContainerState) }
-            <div class="markdown-preview">
-                <div class="markdown-output">
-                    {@html generatedMarkdown}
-                </div>
-            </div>
+        {#if !showAccount && showSettings}
+            <Settings />
+        {/if}
+
+        {#if !showAccount && !showSettings && [0,1].includes(contentContainerState) }
+            <MarkdownEditor bind:value={inputText}/>
+        {/if}
+
+        {#if !showAccount && !showSettings && [0,2].includes(contentContainerState) }
+            <MarkdownPreview html={generatedMarkdown} />
         {/if}
     </div>
 </div>
@@ -133,6 +109,11 @@
         border-bottom: 1px solid black;
 
         display: flex;
+        flex-direction: column;
+    }
+
+    .buttons-bar{
+        display: flex;
         flex-direction: row;
         justify-content: space-between;
     }
@@ -146,36 +127,10 @@
         flex-direction: row;
     }
 
-    .markdown-editor{
-        flex: 1;
-        background-color: rgb(197, 197, 197);
-
+    .utility-bar{
         display: flex;
+        flex-direction: row;
+        justify-content: left;
     }
-
-    .markdown-preview{
-        flex: 1;
-
-        display: flex;
-    }
-
-    .markdown-output{
-        flex: 1;
-
-        overflow-y: scroll;
-        padding: 1em;
-    }
-
-    .text-input{
-        flex: 1;
-
-        padding: 1em;
-        border: 0px;
-        resize: none;
-        background-color: transparent;
-        font-family: 'Courier New', Courier, monospace;
-    }
-
-
 
 </style>

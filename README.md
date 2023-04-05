@@ -1,12 +1,13 @@
 # Notes
 
 ## TODO
-- make tags editor look nice
 - notification popups
-- settings modal
-- account modal
 
-- PLAN FUNCTIONALITY
+-- functionality
+- user login / logout
+- create note, persist to firestore
+- load notes from firestore
+- update notes in firestore
 
 
 ## Data

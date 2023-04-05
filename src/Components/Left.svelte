@@ -5,16 +5,22 @@
     import Select from "./Bootstrap/Select.svelte";
 	import Faker from '../app/faker';
 
+    type SelectEnum = 'title' | 'createdDesc' | 'createdAsc'
+
     const selectValues = {
         'title' : 'title',
         'createdDesc' : 'created (desc)',
         'createdAsc' : 'created (asc)',
     }
-    const selectDefault = 'title'
+    let selectDefault: SelectEnum = 'title'
+    $: {
+        sortListItems( selectDefault )
+    }
 
     let searchValue: string
     $: {
         console.log('searchValue changed', searchValue)
+        filterListItems(searchValue)
     }
 
     interface ListItemData{
@@ -31,6 +37,50 @@
         })
     }
 
+    let listItemsDisplay: ListItemData[] = listItems
+    const sortListItems = (sortBy: SelectEnum) => {
+        listItemsDisplay = listItemsDisplay.sort((a, b) => {
+            if(sortBy === 'title'){
+                return a.title < b.title
+                    ? -1
+                    : 1 
+            }
+
+            if(sortBy === 'createdAsc'){
+                return a.date.valueOf() < b.date.valueOf()
+                    ? -1
+                    : 1 
+            }
+
+            if(sortBy === 'createdDesc'){
+                return a.date.valueOf() > b.date.valueOf()
+                    ? -1
+                    : 1 
+            }
+
+            return 0
+        })
+
+    }
+
+    const filterListItems = (filterStr: string) => {
+        if(filterStr === '' || filterStr === undefined){
+            listItemsDisplay = listItems
+            return
+        }
+
+        const filterLower = filterStr.toLowerCase()
+        const temp = listItems.reduce<ListItemData[]>((carry, current) => {
+            if(current.title.toLowerCase().includes(filterLower)){
+                carry.push( current )
+            }            
+
+            return carry
+        }, [])
+
+        listItemsDisplay = temp
+    }
+
 </script>
 
 <div class="wrapper">
@@ -40,11 +90,13 @@
     </div>
 
     <div>
-        <Select values={selectValues} selected={selectDefault} label='order by'/>
+        <Select values={selectValues} bind:selected={selectDefault} on:change={(e) => {
+            console.log('select changed',{e})
+        }} label='order by'/>
     </div>
 
     <div class="list-container">
-        {#each listItems as listItem, i}
+        {#each listItemsDisplay as listItem, i}
             <div><ListItem 
                 date={listItem.date}
                 title={listItem.title}
