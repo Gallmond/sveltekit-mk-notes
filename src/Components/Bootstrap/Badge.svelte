@@ -1,7 +1,8 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<button on:click class="badge text-bg-secondary"><slot></slot></button>
+<button on:click class="badge text-bg-secondary"><slot /></button>
+
 <style>
-    button{
-        border: 0
-    }
+	button {
+		border: 0;
+	}
 </style>

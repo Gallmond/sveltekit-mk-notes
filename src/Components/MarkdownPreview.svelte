@@ -1,24 +1,24 @@
 <script lang="ts">
-    export let html: string = ''
+	export let html: string = '';
 </script>
 
 <div class="markdown-preview">
-    <div class="markdown-output">
-        {@html html}
-    </div>
+	<div class="markdown-output">
+		{@html html}
+	</div>
 </div>
 
 <style>
-    .markdown-preview{
-        flex: 1;
+	.markdown-preview {
+		flex: 1;
 
-        display: flex;
-    }
+		display: flex;
+	}
 
-    .markdown-output{
-        flex: 1;
+	.markdown-output {
+		flex: 1;
 
-        overflow-y: scroll;
-        padding: 1em;
-    }
+		overflow-y: scroll;
+		padding: 1em;
+	}
 </style>

@@ -30,6 +30,7 @@
 	"type": "module",
 	"dependencies": {
 		"@types/marked": "^4.0.8",
+		"firebase": "^9.19.1",
 		"marked": "^4.3.0"
 	}
 }
