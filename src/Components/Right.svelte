@@ -1,46 +1,61 @@
 <script lang="ts">
-	import LightButton from './Bootstrap/LightButton.svelte';
-	import { marked } from 'marked';
-	import Tags from './Tags.svelte';
-	import MarkdownEditor from './MarkdownEditor.svelte';
-	import MarkdownPreview from './MarkdownPreview.svelte';
-	import Settings from './Settings.svelte';
-	import Account from './Account.svelte';
+	import user from '$stores/user'
+	import LightButton from './Bootstrap/LightButton.svelte'
+	import { marked } from 'marked'
+	import Tags from './Tags.svelte'
+	import MarkdownEditor from './MarkdownEditor.svelte'
+	import MarkdownPreview from './MarkdownPreview.svelte'
+	import Settings from './Settings.svelte'
+	import Account from './Account.svelte'
+	import FireBase from '../app/Firebase'
 
-	let contentContainerState = 0;
+	let contentContainerState = 0
 
-	let inputText = '';
-	let generatedMarkdown = '';
+	let inputText = ''
+	let generatedMarkdown = ''
+
+	let displayName = ''
+	user.subscribe((user) => {
+		console.log('user updated on Right.svelte', { user })
+
+		if (user === null) {
+			displayName = ''
+			return
+		}
+
+		displayName =
+			user.displayName === null ? user.email ?? '' : `${user.displayName} <${user.email}>`
+	})
 
 	$: {
-		generatedMarkdown = marked(inputText);
-		inputTextChanged(inputText);
+		generatedMarkdown = marked(inputText)
+		inputTextChanged(inputText)
 	}
 
-	const togglePin = () => console.log('togglePin');
-	const sendToTrash = () => console.log('sendToTrash');
+	const togglePin = () => console.log('togglePin')
+	const sendToTrash = () => console.log('sendToTrash')
 
 	const inputTextChanged = (text: string) => {
-		console.log('inputTextChanged', { text });
-	};
+		console.log('inputTextChanged', { text })
+	}
 
-	let tagsActive = false;
-	let tags = ['birthday', 'recipe', 'note'];
+	let tagsActive = false
+	let tags = ['birthday', 'recipe', 'note']
 	const tagsChanged = (tags: Tag[]) => {
-		console.log('tags have changed', { tags });
-	};
+		console.log('tags have changed', { tags })
+	}
 
-	let showSettings = false; // TEMP
+	let showSettings = false // TEMP
 	const toggleSettings = () => {
-		showAccount = false;
-		showSettings = !showSettings;
-	};
+		showAccount = false
+		showSettings = !showSettings
+	}
 
-	let showAccount = true;
+	let showAccount = true
 	const toggleAccount = () => {
-		showSettings = false;
-		showAccount = !showAccount;
-	};
+		showSettings = false
+		showAccount = !showAccount
+	}
 </script>
 
 <div class="wrapper">
@@ -49,13 +64,13 @@
 			<div class="buttons-container">
 				<LightButton
 					on:click={() => {
-						contentContainerState = (contentContainerState + 1) % 3;
+						contentContainerState = (contentContainerState + 1) % 3
 					}}>✏️/👁️</LightButton
 				>
 				<LightButton
 					active={tagsActive}
 					on:click={() => {
-						tagsActive = !tagsActive;
+						tagsActive = !tagsActive
 					}}>🏷️</LightButton
 				>
 				<LightButton on:click={togglePin}>📌</LightButton>
@@ -63,6 +78,7 @@
 			</div>
 
 			<div class="buttons-container">
+				<small>{displayName}</small>
 				<LightButton active={showSettings} on:click={toggleSettings}>⚙️</LightButton>
 				<LightButton active={showAccount} on:click={toggleAccount}>👤</LightButton>
 			</div>

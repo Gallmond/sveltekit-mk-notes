@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount } from 'svelte'
 
-	export let label: string = '';
-	export let values: Record<string, string> = {};
-	export let selected: string = '';
+	export let label: string = ''
+	export let values: Record<string, string> = {}
+	export let selected: string = ''
 
-	let selectElement: HTMLSelectElement;
+	let selectElement: HTMLSelectElement
 	onMount(() => {
-		if (selectElement === null) return;
+		if (selectElement === null) return
 
 		selectElement.onchange = (e) => {
-			const target = e.target as HTMLSelectElement | null;
-			if (!target) return;
+			const target = e.target as HTMLSelectElement | null
+			if (!target) return
 
-			selected = target.value;
-		};
-	});
+			selected = target.value
+		}
+	})
 </script>
 
 <div class="input-group mb-3">

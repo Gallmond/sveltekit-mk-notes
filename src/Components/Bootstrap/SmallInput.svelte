@@ -1,8 +1,8 @@
 <script lang="ts">
-	import LightButton from './LightButton.svelte';
+	import LightButton from './LightButton.svelte'
 
-	export let label = 'button';
-	export let value = '';
+	export let label = 'button'
+	export let value = ''
 </script>
 
 <div class="input-group input-group-sm">

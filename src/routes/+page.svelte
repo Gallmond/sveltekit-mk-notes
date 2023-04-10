@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Left from '../Components/Left.svelte';
-	import Right from '../Components/Right.svelte';
+	import Left from '../Components/Left.svelte'
+	import Right from '../Components/Right.svelte'
 </script>
 
 <div class="wrapper">

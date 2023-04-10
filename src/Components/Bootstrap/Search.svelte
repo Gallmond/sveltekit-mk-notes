@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let input: string;
+	export let input: string
 </script>
 
 <div class="input-group mb-3">

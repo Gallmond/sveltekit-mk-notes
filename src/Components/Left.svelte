@@ -1,78 +1,78 @@
 <script lang="ts">
-	import ListItem from './ListItem.svelte';
+	import ListItem from './ListItem.svelte'
 
-	import Search from './Bootstrap/Search.svelte';
-	import Select from './Bootstrap/Select.svelte';
-	import Faker from '../app/faker';
+	import Search from './Bootstrap/Search.svelte'
+	import Select from './Bootstrap/Select.svelte'
+	import Faker from '../app/faker'
 
-	type SelectEnum = 'title' | 'createdDesc' | 'createdAsc';
+	type SelectEnum = 'title' | 'createdDesc' | 'createdAsc'
 
 	const selectValues = {
 		title: 'title',
 		createdDesc: 'created (desc)',
 		createdAsc: 'created (asc)'
-	};
-	let selectDefault: SelectEnum = 'title';
+	}
+	let selectDefault: SelectEnum = 'title'
 	$: {
-		sortListItems(selectDefault);
+		sortListItems(selectDefault)
 	}
 
-	let searchValue: string;
+	let searchValue: string
 	$: {
-		console.log('searchValue changed', searchValue);
-		filterListItems(searchValue);
+		console.log('searchValue changed', searchValue)
+		filterListItems(searchValue)
 	}
 
 	interface ListItemData {
-		title: string;
-		date: string;
-		tags: string[];
+		title: string
+		date: string
+		tags: string[]
 	}
-	const listItems: ListItemData[] = [];
+	const listItems: ListItemData[] = []
 	for (let i = 0, l = 5; i < l; i++) {
 		listItems.push({
 			title: Faker.title(),
 			date: Faker.date(),
 			tags: Faker.tags(4)
-		});
+		})
 	}
 
-	let listItemsDisplay: ListItemData[] = listItems;
+	let listItemsDisplay: ListItemData[] = listItems
 	const sortListItems = (sortBy: SelectEnum) => {
 		listItemsDisplay = listItemsDisplay.sort((a, b) => {
 			if (sortBy === 'title') {
-				return a.title < b.title ? -1 : 1;
+				return a.title < b.title ? -1 : 1
 			}
 
 			if (sortBy === 'createdAsc') {
-				return a.date.valueOf() < b.date.valueOf() ? -1 : 1;
+				return a.date.valueOf() < b.date.valueOf() ? -1 : 1
 			}
 
 			if (sortBy === 'createdDesc') {
-				return a.date.valueOf() > b.date.valueOf() ? -1 : 1;
+				return a.date.valueOf() > b.date.valueOf() ? -1 : 1
 			}
 
-			return 0;
-		});
-	};
+			return 0
+		})
+	}
 
 	const filterListItems = (filterStr: string) => {
 		if (filterStr === '' || filterStr === undefined) {
-			listItemsDisplay = listItems;
-			return;
+			listItemsDisplay = listItems
+			return
 		}
 
-		const filterLower = filterStr.toLowerCase();
+		const filterLower = filterStr.toLowerCase()
 		const temp = listItems.reduce<ListItemData[]>((carry, current) => {
 			if (current.title.toLowerCase().includes(filterLower)) {
-				carry.push(current);
+				carry.push(current)
 			}
 
-			return carry;
-		}, []);
+			return carry
+		}, [])
 
-		listItemsDisplay = temp;
-	};
+		listItemsDisplay = temp
+	}
 </script>
 
 <div class="wrapper">
@@ -85,7 +85,7 @@
 			values={selectValues}
 			bind:selected={selectDefault}
 			on:change={(e) => {
-				console.log('select changed', { e });
+				console.log('select changed', { e })
 			}}
 			label="order by"
 		/>

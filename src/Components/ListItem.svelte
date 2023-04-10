@@ -1,10 +1,10 @@
 <script lang="ts">
-	import Badge from './Bootstrap/Badge.svelte';
-	import Card from './Bootstrap/Card.svelte';
+	import Badge from './Bootstrap/Badge.svelte'
+	import Card from './Bootstrap/Card.svelte'
 
-	export let title = 'This is the title';
-	export let date = 'this is the date';
-	export let tags = ['tag'];
+	export let title = 'This is the title'
+	export let date = 'this is the date'
+	export let tags = ['tag']
 </script>
 
 <Card>

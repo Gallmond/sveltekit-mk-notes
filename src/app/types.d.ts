@@ -1,1 +1,1 @@
-type Tag = string;
+type Tag = string

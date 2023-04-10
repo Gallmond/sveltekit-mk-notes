@@ -1,15 +1,16 @@
 # Notes
 
-## TODO
+## BACKLOG
 
-- notification popups
+- Handle firebase errors (registry and sign-in etc. Currently there's no handling)
+
+## TODO
 
 -- functionality
 
-- user login / logout
-- create note, persist to firestore
 - load notes from firestore
 - update notes in firestore
+- subscribe to note changes (stores and collection sub?)
 
 ## Data
 

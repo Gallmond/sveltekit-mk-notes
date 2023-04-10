@@ -1,9 +1,9 @@
 <script lang="ts">
-	export let active: boolean = false;
+	export let active: boolean = false
 
-	let type = 'bdn-primary';
+	let type = 'bdn-primary'
 	$: {
-		type = active ? 'btn-primary' : 'btn-secondary';
+		type = active ? 'btn-primary' : 'btn-secondary'
 	}
 </script>
 
