@@ -22,7 +22,9 @@ import {
 	getDocs,
 	addDoc,
 	CollectionReference,
-	QueryDocumentSnapshot
+	QueryDocumentSnapshot,
+	onSnapshot,
+	type Unsubscribe
 } from 'firebase/firestore'
 
 // Your web app's Firebase configuration
@@ -56,7 +58,7 @@ abstract class BaseFirestoreEntity {
 	}
 }
 
-class UserNote extends BaseFirestoreEntity {
+export class UserNote extends BaseFirestoreEntity {
 	constructor(
 		public title: string,
 		public content: string = '',
@@ -78,12 +80,14 @@ class UserNote extends BaseFirestoreEntity {
 				updatedAt: Timestamp.fromDate(userNote.createdAt)
 			}
 		},
-		fromFirestore(snapshot: QueryDocumentSnapshot<UserNote>, options) {
+		fromFirestore(snapshot: QueryDocumentSnapshot, options) {
 			const data = snapshot.data(options)
 
 			const { title, content, tags, pinned, createdAt, updatedAt } = data
 
-			const userNote = new UserNote(title, content, tags, pinned, createdAt, updatedAt)
+			const userNote = new UserNote(
+				title, content, tags, pinned, createdAt.toDate(), updatedAt.toDate()
+			)
 
 			return userNote.setFirestoreUid(snapshot.id)
 		}
@@ -99,6 +103,8 @@ class FireBase {
 	store: Firestore
 	currentUser: User | null = null
 	authStateChangedCallbacks: AuthStateChangedCallback[] = []
+	
+	notesListenerUnsubscribe: Unsubscribe | null = null
 
 	localEnvironments = ['local', 'development']
 
@@ -170,13 +176,34 @@ class FireBase {
 	}
 
 	public async getUserNotes(user: User): Promise<UserNote[]> {
+		console.debug('Firebase.getUserNotes')
+		
 		const querySnapshot = await getDocs(this.notesRef(user))
 		const userNotes: UserNote[] = []
 		querySnapshot.forEach((thisDoc) => {
 			userNotes.push(thisDoc.data())
 		})
 
+		console.debug(`got ${userNotes.length} notes`, {userNotes})
+
+
 		return userNotes
+	}
+
+	public clearOnUserNotesChanged(): void
+	{
+		this.notesListenerUnsubscribe && this.notesListenerUnsubscribe()
+	}
+
+	public onUserNotesChanged(user: User, callback: (notes: UserNote[]) => void): void
+	{
+		this.notesListenerUnsubscribe = onSnapshot(this.notesRef(user), (querySnapshot) => {
+			const notes: UserNote[] = []
+			querySnapshot.forEach(doc => {
+				notes.push(doc.data())
+			})
+			callback(notes)
+		});
 	}
 
 	public async createUserNote(

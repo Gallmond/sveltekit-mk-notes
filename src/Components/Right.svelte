@@ -1,5 +1,5 @@
 <script lang="ts">
-	import user from '$stores/user'
+	import { user } from '$stores/user'
 	import LightButton from './Bootstrap/LightButton.svelte'
 	import { marked } from 'marked'
 	import Tags from './Tags.svelte'
@@ -7,7 +7,6 @@
 	import MarkdownPreview from './MarkdownPreview.svelte'
 	import Settings from './Settings.svelte'
 	import Account from './Account.svelte'
-	import FireBase from '../app/Firebase'
 
 	let contentContainerState = 0
 

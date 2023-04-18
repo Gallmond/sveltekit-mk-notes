@@ -6,6 +6,10 @@
 
 ## TODO
 
+- Add note
+- Load all notes into list
+- edit note
+
 -- functionality
 
 - load notes from firestore

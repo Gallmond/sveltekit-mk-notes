@@ -1,5 +1,6 @@
 <script lang="ts">
-	export let active: boolean = false
+	export let active = false
+	export let disabled = false
 
 	let type = 'bdn-primary'
 	$: {
@@ -7,6 +8,6 @@
 	}
 </script>
 
-<button type="button" class="btn {type} btn-sm" on:click>
+<button type="button" class="btn {type} btn-sm" on:click disabled={disabled}>
 	<slot />
 </button>

@@ -1,6 +1,13 @@
 <script lang="ts">
 	import Left from '../Components/Left.svelte'
 	import Right from '../Components/Right.svelte'
+	import FireBase from '../app/Firebase';
+	import { notes } from '$stores/user';
+
+	const fb = FireBase.make()
+
+
+
 </script>
 
 <div class="wrapper">

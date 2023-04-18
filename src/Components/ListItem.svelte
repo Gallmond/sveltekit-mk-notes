@@ -1,10 +1,16 @@
 <script lang="ts">
+	import type { UserNote } from '../app/Firebase'
 	import Badge from './Bootstrap/Badge.svelte'
 	import Card from './Bootstrap/Card.svelte'
 
-	export let title = 'This is the title'
-	export let date = 'this is the date'
-	export let tags = ['tag']
+	export let note: UserNote
+
+	console.debug('ListItem', {note})
+
+	const title = note.title
+	const date = note.createdAt.toISOString().split('T')[0]
+	const tags = note.tags
+	const pinned = note.pinned
 </script>
 
 <Card>
@@ -15,7 +21,7 @@
 		</div>
 
 		<div class="bit">
-			<p>📌</p>
+			<p>{pinned ? '📌' : ''}</p>
 			<div class="tags-container">
 				{#each tags as tag, i}
 					<div class="tag-container"><Badge>{tag}</Badge></div>
