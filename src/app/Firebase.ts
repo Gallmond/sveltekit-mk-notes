@@ -86,7 +86,12 @@ export class UserNote extends BaseFirestoreEntity {
 			const { title, content, tags, pinned, createdAt, updatedAt } = data
 
 			const userNote = new UserNote(
-				title, content, tags, pinned, createdAt.toDate(), updatedAt.toDate()
+				title,
+				content,
+				tags,
+				pinned,
+				createdAt.toDate(),
+				updatedAt.toDate()
 			)
 
 			return userNote.setFirestoreUid(snapshot.id)
@@ -103,7 +108,7 @@ class FireBase {
 	store: Firestore
 	currentUser: User | null = null
 	authStateChangedCallbacks: AuthStateChangedCallback[] = []
-	
+
 	notesListenerUnsubscribe: Unsubscribe | null = null
 
 	localEnvironments = ['local', 'development']
@@ -177,33 +182,30 @@ class FireBase {
 
 	public async getUserNotes(user: User): Promise<UserNote[]> {
 		console.debug('Firebase.getUserNotes')
-		
+
 		const querySnapshot = await getDocs(this.notesRef(user))
 		const userNotes: UserNote[] = []
 		querySnapshot.forEach((thisDoc) => {
 			userNotes.push(thisDoc.data())
 		})
 
-		console.debug(`got ${userNotes.length} notes`, {userNotes})
-
+		console.debug(`got ${userNotes.length} notes`, { userNotes })
 
 		return userNotes
 	}
 
-	public clearOnUserNotesChanged(): void
-	{
+	public clearOnUserNotesChanged(): void {
 		this.notesListenerUnsubscribe && this.notesListenerUnsubscribe()
 	}
 
-	public onUserNotesChanged(user: User, callback: (notes: UserNote[]) => void): void
-	{
+	public onUserNotesChanged(user: User, callback: (notes: UserNote[]) => void): void {
 		this.notesListenerUnsubscribe = onSnapshot(this.notesRef(user), (querySnapshot) => {
 			const notes: UserNote[] = []
-			querySnapshot.forEach(doc => {
+			querySnapshot.forEach((doc) => {
 				notes.push(doc.data())
 			})
 			callback(notes)
-		});
+		})
 	}
 
 	public async createUserNote(

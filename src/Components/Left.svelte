@@ -6,7 +6,7 @@
 	import { user, notes } from '$stores/user'
 	import FireBase, { UserNote } from '../app/Firebase'
 
-	const fb = FireBase.make();
+	const fb = FireBase.make()
 
 	type SelectEnum = 'title' | 'createdDesc' | 'createdAsc'
 
@@ -20,7 +20,7 @@
 		sortDisplayNotes(selectDefault)
 	}
 
-	let searchValue: string = ''
+	let searchValue = ''
 	$: {
 		filterDisplayNotes(searchValue)
 	}
@@ -29,21 +29,21 @@
 	let newNoteDisabled = false
 	let allNotes: UserNote[] = []
 	let displayNotes: UserNote[] = []
-	user.subscribe(user => {
-		console.debug('Left.svelte, user writable changed', {user})
+	user.subscribe((user) => {
+		console.debug('Left.svelte, user writable changed', { user })
 		newNoteDisabled = user === null
 	})
-	
-	notes.subscribe( updatedNotes => {
+
+	notes.subscribe((updatedNotes) => {
 		/**
-		 * //TODO this is firing but the notes on the page aren't updating for 
+		 * //TODO this is firing but the notes on the page aren't updating for
 		 * some reason
-		 * 
-		 * Refactor this logic. Instead just watch for allNotes changes and 
+		 *
+		 * Refactor this logic. Instead just watch for allNotes changes and
 		 * displayNotes should just always take the current state of search and
 		 * order options before being passed into the loop
-		*/
-		console.log('updatedNotes', {updatedNotes})
+		 */
+		console.log('updatedNotes', { updatedNotes })
 		allNotes = updatedNotes
 		console.debug('allNotes set')
 		displayNotes = updatedNotes
@@ -51,27 +51,27 @@
 	})
 
 	const createNewNote = async () => {
-		if($user === null) return;
+		if ($user === null) return
 		await fb.createUserNote($user, 'New Note!')
 	}
 
 	const sortDisplayNotes = (by: SelectEnum) => {
 		displayNotes = allNotes.slice().sort((a, b) => {
-			if(by === 'title'){
-				if(a.title < b.title) return -1
-				if(a.title > b.title) return 1
+			if (by === 'title') {
+				if (a.title < b.title) return -1
+				if (a.title > b.title) return 1
 				return 0
 			}
 
-			if(by === 'createdDesc'){
-				if(a.createdAt > b.createdAt) return -1
-				if(a.createdAt < b.createdAt) return 1
+			if (by === 'createdDesc') {
+				if (a.createdAt > b.createdAt) return -1
+				if (a.createdAt < b.createdAt) return 1
 				return 0
 			}
 
-			if(by === 'createdAsc'){
-				if(a.createdAt > b.createdAt) return 1
-				if(a.createdAt < b.createdAt) return -1
+			if (by === 'createdAsc') {
+				if (a.createdAt > b.createdAt) return 1
+				if (a.createdAt < b.createdAt) return -1
 				return 0
 			}
 
@@ -79,18 +79,15 @@
 		})
 	}
 	const filterDisplayNotes = (str: string) => {
-		if(str === ''){
+		if (str === '') {
 			displayNotes = allNotes.slice()
 			return
 		}
 
-		displayNotes = allNotes.slice().filter(note => {
-			return note.title
-				.toLowerCase()
-				.includes( str.toLowerCase() )
+		displayNotes = allNotes.slice().filter((note) => {
+			return note.title.toLowerCase().includes(str.toLowerCase())
 		})
 	}
-
 </script>
 
 <div class="wrapper">
@@ -110,17 +107,13 @@
 	</div>
 
 	<div>
-		<LightButton
-			disabled={newNoteDisabled}
-			on:click={createNewNote}
-		>Create note
-		</LightButton>
+		<LightButton disabled={newNoteDisabled} on:click={createNewNote}>Create note</LightButton>
 	</div>
 
 	<div class="list-container">
-		{#each displayNotes as displayNote (displayNote) }
+		{#each displayNotes as displayNote (displayNote)}
 			<div>
-				<ListItem note={displayNote}/>
+				<ListItem note={displayNote} />
 			</div>
 		{/each}
 	</div>

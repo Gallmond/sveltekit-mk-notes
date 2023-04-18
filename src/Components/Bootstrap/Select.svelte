@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
-	export let label: string = ''
+	export let label = ''
 	export let values: Record<string, string> = {}
-	export let selected: string = ''
+	export let selected = ''
 
 	let selectElement: HTMLSelectElement
 	onMount(() => {

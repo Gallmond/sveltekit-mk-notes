@@ -8,6 +8,6 @@
 	}
 </script>
 
-<button type="button" class="btn {type} btn-sm" on:click disabled={disabled}>
+<button type="button" class="btn {type} btn-sm" on:click {disabled}>
 	<slot />
 </button>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let html: string = ''
+	export let html = ''
 </script>
 
 <div class="markdown-preview">

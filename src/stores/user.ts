@@ -8,21 +8,20 @@ const notes = writable<UserNote[]>([])
 
 const fb = FireBase.make()
 
-fb.addOnAuthChangeHandler( async (changedUser) => {
+fb.addOnAuthChangeHandler(async (changedUser) => {
 	user.set(changedUser)
-	
-	if(changedUser === null){
+
+	if (changedUser === null) {
 		console.debug('Clearing user notes')
 		notes.set([])
 		fb.clearOnUserNotesChanged()
-	}else{
+	} else {
 		console.debug('Fetching user notes')
 		notes.set(await fb.getUserNotes(changedUser))
-		fb.onUserNotesChanged(changedUser, changedNotes => {
+		fb.onUserNotesChanged(changedUser, (changedNotes) => {
 			notes.set(changedNotes)
 		})
 	}
-	
 })
 
 export { user, notes }

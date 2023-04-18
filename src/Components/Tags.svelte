@@ -1,9 +1,12 @@
 <script lang="ts">
 	import SmallInput from './Bootstrap/SmallInput.svelte'
 	import Badge from './Bootstrap/Badge.svelte'
+	import type { Tag } from '../app/types'
 
 	export let tags: Tag[] = []
-	export let onChange: (tags: Tag[]) => void = (tags) => {}
+	export let onChange: (tags: Tag[]) => void = () => {
+		// do nothing
+	}
 
 	let newTagInput = ''
 

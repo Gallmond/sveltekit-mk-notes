@@ -3,6 +3,7 @@
 	import LightButton from './Bootstrap/LightButton.svelte'
 	import { marked } from 'marked'
 	import Tags from './Tags.svelte'
+	import type { Tag } from '../app/types'
 	import MarkdownEditor from './MarkdownEditor.svelte'
 	import MarkdownPreview from './MarkdownPreview.svelte'
 	import Settings from './Settings.svelte'

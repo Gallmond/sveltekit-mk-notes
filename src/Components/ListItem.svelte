@@ -5,8 +5,6 @@
 
 	export let note: UserNote
 
-	console.debug('ListItem', {note})
-
 	const title = note.title
 	const date = note.createdAt.toISOString().split('T')[0]
 	const tags = note.tags
