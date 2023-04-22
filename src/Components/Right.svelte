@@ -8,11 +8,84 @@
 	import MarkdownPreview from './MarkdownPreview.svelte'
 	import Settings from './Settings.svelte'
 	import Account from './Account.svelte'
+	import type { UserNote } from '../app/Firebase'
+	import { createEventDispatcher } from 'svelte'
 
-	let contentContainerState = 0
+	const dispatchPinned = createEventDispatcher<{ notePinned: { note: UserNote } }>()
+	const dispatchTagsChanged = createEventDispatcher<{ noteTagsChanged: { note: UserNote } }>()
+	const dispatchContentChanged = createEventDispatcher<{ noteContentChanged: { note: UserNote } }>()
+
+	export let note: UserNote | null = null
 
 	let inputText = ''
 	let generatedMarkdown = ''
+	let tags: Tag[] = []
+
+	/**
+	 * When the component's note changes, set the input text and generated
+	 * markdown
+	 */
+	$: {
+		console.log('note changed', { note })
+		setInitialNote(note)
+	}
+	const setInitialNote = (note: UserNote | null): void => {
+		inputText = note?.content ?? ''
+		generatedMarkdown = marked(inputText)
+		tags = note?.tags ?? []
+	}
+
+	/**
+	 * when the input text changes (from user input) also update the markdown
+	 * and trigger an update to save in 2 seconds of inactivity
+	 */
+	let pendingSave: NodeJS.Timeout | null = null // eslint-disable-line no-undef
+	$: {
+		generatedMarkdown = marked(inputText)
+		initiateSave()
+	}
+	const initiateSave = () => {
+		console.debug('initiateSave')
+		if (pendingSave !== null) {
+			clearTimeout(pendingSave)
+		}
+
+		pendingSave = setTimeout(() => {
+			if (note === null) return
+
+			note.content = inputText
+
+			dispatchContentChanged('noteContentChanged', { note })
+		}, 3000)
+	}
+
+	// === what to display =====================================================
+	enum Display {
+		ACCOUNT = 0b0001, // 1
+		SETTINGS = 0b0010, // 2
+		EDITOR = 0b0100, // 4
+		PREVIEW = 0b1000 // 8
+	}
+
+	const containsMasks = (test: number, ...masks: Display[]): boolean => {
+		let valid = 0
+		for (const mask of masks) {
+			if (test & mask) valid++
+		}
+
+		return valid === masks.length
+	}
+
+	const clearNonNoteStates = () => {
+		displayState &= ~Display.SETTINGS
+		displayState &= ~Display.ACCOUNT
+	}
+
+	const togglePreview = () => (displayState = displayState ^ Display.PREVIEW)
+	const toggleEditor = () => (displayState = displayState ^ Display.EDITOR)
+
+	let displayState = Display.PREVIEW + Display.EDITOR
+	// =========================================================================
 
 	let displayName = ''
 	user.subscribe((user) => {
@@ -27,34 +100,23 @@
 			user.displayName === null ? user.email ?? '' : `${user.displayName} <${user.email}>`
 	})
 
-	$: {
-		generatedMarkdown = marked(inputText)
-		inputTextChanged(inputText)
-	}
+	const pinClicked = () => {
+		if (note === null) return
 
-	const togglePin = () => console.log('togglePin')
-	const sendToTrash = () => console.log('sendToTrash')
-
-	const inputTextChanged = (text: string) => {
-		console.log('inputTextChanged', { text })
+		dispatchPinned('notePinned', { note })
 	}
 
 	let tagsActive = false
-	let tags = ['birthday', 'recipe', 'note']
 	const tagsChanged = (tags: Tag[]) => {
-		console.log('tags have changed', { tags })
+		if (note === null) return
+
+		note.tags = tags
+
+		dispatchTagsChanged('noteTagsChanged', { note })
 	}
 
-	let showSettings = false // TEMP
-	const toggleSettings = () => {
-		showAccount = false
-		showSettings = !showSettings
-	}
-
-	let showAccount = true
-	const toggleAccount = () => {
-		showSettings = false
-		showAccount = !showAccount
+	$: {
+		console.log('displayState', displayState)
 	}
 </script>
 
@@ -63,9 +125,18 @@
 		<div class="buttons-bar">
 			<div class="buttons-container">
 				<LightButton
+					active={containsMasks(displayState, Display.EDITOR)}
 					on:click={() => {
-						contentContainerState = (contentContainerState + 1) % 3
-					}}>✏️/👁️</LightButton
+						clearNonNoteStates()
+						toggleEditor()
+					}}>✏️</LightButton
+				>
+				<LightButton
+					active={containsMasks(displayState, Display.PREVIEW)}
+					on:click={() => {
+						clearNonNoteStates()
+						togglePreview()
+					}}>👁️</LightButton
 				>
 				<LightButton
 					active={tagsActive}
@@ -73,14 +144,23 @@
 						tagsActive = !tagsActive
 					}}>🏷️</LightButton
 				>
-				<LightButton on:click={togglePin}>📌</LightButton>
-				<LightButton on:click={sendToTrash}>🗑️</LightButton>
+				<LightButton on:click={pinClicked}>📌</LightButton>
 			</div>
 
 			<div class="buttons-container">
 				<small>{displayName}</small>
-				<LightButton active={showSettings} on:click={toggleSettings}>⚙️</LightButton>
-				<LightButton active={showAccount} on:click={toggleAccount}>👤</LightButton>
+				<LightButton
+					active={displayState === Display.SETTINGS}
+					on:click={() => {
+						displayState = Display.SETTINGS
+					}}>⚙️</LightButton
+				>
+				<LightButton
+					active={displayState === Display.ACCOUNT}
+					on:click={() => {
+						displayState = Display.ACCOUNT
+					}}>👤</LightButton
+				>
 			</div>
 		</div>
 
@@ -92,19 +172,19 @@
 	</div>
 
 	<div class="content-container">
-		{#if showAccount && !showSettings}
+		{#if displayState === Display.ACCOUNT}
 			<Account />
 		{/if}
 
-		{#if !showAccount && showSettings}
+		{#if displayState === Display.SETTINGS}
 			<Settings />
 		{/if}
 
-		{#if !showAccount && !showSettings && [0, 1].includes(contentContainerState)}
+		{#if displayState & Display.EDITOR}
 			<MarkdownEditor bind:value={inputText} />
 		{/if}
 
-		{#if !showAccount && !showSettings && [0, 2].includes(contentContainerState)}
+		{#if displayState & Display.PREVIEW}
 			<MarkdownPreview html={generatedMarkdown} />
 		{/if}
 	</div>

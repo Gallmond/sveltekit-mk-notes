@@ -24,7 +24,8 @@ import {
 	CollectionReference,
 	QueryDocumentSnapshot,
 	onSnapshot,
-	type Unsubscribe
+	type Unsubscribe,
+	deleteDoc
 } from 'firebase/firestore'
 
 // Your web app's Firebase configuration
@@ -75,6 +76,7 @@ export class UserNote extends BaseFirestoreEntity {
 			return {
 				title: userNote.title,
 				content: userNote.content,
+				pinned: userNote.pinned,
 				tags: userNote.tags,
 				createdAt: Timestamp.fromDate(userNote.createdAt),
 				updatedAt: Timestamp.fromDate(userNote.createdAt)
@@ -177,6 +179,8 @@ class FireBase {
 	}
 
 	public async updateUserNote(user: User, note: UserNote): Promise<void> {
+		note.updatedAt = new Date()
+
 		await setDoc(this.noteRef(user, note), note, { merge: true })
 	}
 
@@ -206,6 +210,10 @@ class FireBase {
 			})
 			callback(notes)
 		})
+	}
+
+	public async deleteUserNote(user: User, note: UserNote): Promise<void> {
+		return deleteDoc(this.noteRef(user, note))
 	}
 
 	public async createUserNote(

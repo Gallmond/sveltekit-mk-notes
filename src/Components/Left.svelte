@@ -3,10 +3,13 @@
 	import Search from './Bootstrap/Search.svelte'
 	import Select from './Bootstrap/Select.svelte'
 	import LightButton from './Bootstrap/LightButton.svelte'
-	import { user, notes } from '$stores/user'
-	import FireBase, { UserNote } from '../app/Firebase'
+	import { user } from '$stores/user'
+	import { createEventDispatcher } from 'svelte'
+	import type { UserNote } from '../app/Firebase'
 
-	const fb = FireBase.make()
+	export let notes: UserNote[] = []
+
+	const dispatchCreated = createEventDispatcher<{ noteCreated: { title: string } }>()
 
 	type SelectEnum = 'title' | 'createdDesc' | 'createdAsc'
 
@@ -34,25 +37,23 @@
 		newNoteDisabled = user === null
 	})
 
-	notes.subscribe((updatedNotes) => {
-		/**
-		 * //TODO this is firing but the notes on the page aren't updating for
-		 * some reason
-		 *
-		 * Refactor this logic. Instead just watch for allNotes changes and
-		 * displayNotes should just always take the current state of search and
-		 * order options before being passed into the loop
-		 */
-		console.log('updatedNotes', { updatedNotes })
-		allNotes = updatedNotes
-		console.debug('allNotes set')
-		displayNotes = updatedNotes
-		console.debug('displayNotes set')
-	})
+	$: {
+		allNotes = notes
+		displayNotes = notes
+	}
 
 	const createNewNote = async () => {
 		if ($user === null) return
-		await fb.createUserNote($user, 'New Note!')
+
+		const time = new Intl.DateTimeFormat('en-gb', {
+			timeStyle: 'short'
+		}).format(new Date()) // 05:30
+
+		const n = notes.length
+
+		const title = `Note ${n} (${time})`
+
+		dispatchCreated('noteCreated', { title })
 	}
 
 	const sortDisplayNotes = (by: SelectEnum) => {
@@ -113,7 +114,7 @@
 	<div class="list-container">
 		{#each displayNotes as displayNote (displayNote)}
 			<div>
-				<ListItem note={displayNote} />
+				<ListItem note={displayNote} on:noteDeleted on:noteSelected on:noteUnpinned />
 			</div>
 		{/each}
 	</div>
