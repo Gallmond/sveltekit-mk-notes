@@ -12,8 +12,8 @@
 
 	const addTag = (tag: Tag) => {
 		// do nothing if tag already exists
-		if(tags.includes(tag)) return
-		
+		if (tags.includes(tag)) return
+
 		tags = [...tags, tag]
 
 		onChange(tags)
@@ -23,8 +23,6 @@
 		const index = tags.indexOf(tag)
 
 		if (index === -1) return
-
-		
 
 		tags.splice(index, 1)
 		tags = tags

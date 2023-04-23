@@ -9,7 +9,7 @@
 	const dispatchUnpinned = createEventDispatcher<{ noteUnpinned: { note: UserNote } }>()
 
 	export let note: UserNote
-	export let selected: boolean = false
+	export let selected = false
 
 	const title = note.title
 	const date = note.createdAt.toISOString().split('T')[0]
@@ -44,12 +44,9 @@
 
 	let cardStyles: Record<string, string> = {}
 	const setCardStyles = (selected: boolean) => {
-		cardStyles = selected
-			? {'border': '2px solid black'}
-			: {}
+		cardStyles = selected ? { border: '2px solid black' } : {}
 	}
 	$: setCardStyles(selected)
-
 </script>
 
 <Card styles={cardStyles}>
@@ -128,7 +125,7 @@
 		flex: 1;
 	}
 
-	.icons{
+	.icons {
 		white-space: nowrap;
 	}
 </style>

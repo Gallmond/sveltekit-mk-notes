@@ -5,19 +5,20 @@
 
 	const setStyleString = () => {
 		const init: string[] = []
-		styleString = Object.entries(styles).reduce((carry, keyVal) => {
-			const [key, val] = keyVal
-			carry.push(`${key}: ${val}`);
+		styleString = Object.entries(styles)
+			.reduce((carry, keyVal) => {
+				const [key, val] = keyVal
+				carry.push(`${key}: ${val}`)
 
-			return carry
-		}, init).join('; ')
+				return carry
+			}, init)
+			.join('; ')
 	}
 
 	$: {
 		styles
 		setStyleString()
 	}
-
 </script>
 
 <div class="card" style={styleString}>

@@ -30,12 +30,12 @@
 	}
 
 	// ONLY CLEAN CODE BELOW!!!
-	let newNoteDisabled = false
+	let controlsDisabled = false
 	let allNotes: UserNote[] = []
 	let displayNotes: UserNote[] = []
 	user.subscribe((user) => {
 		console.debug('Left.svelte, user writable changed', { user })
-		newNoteDisabled = user === null
+		controlsDisabled = user === null
 	})
 
 	$: {
@@ -90,13 +90,13 @@
 
 		displayNotes = allNotes.slice().filter((note) => {
 			// string is in title
-			if(note.title.toLowerCase().includes(strLs.toLowerCase())){
+			if (note.title.toLowerCase().includes(strLs.toLowerCase())) {
 				return true
 			}
 
 			// string is in a tag
-			for(const tag of note.tags){
-				if(tag.toLowerCase().includes(strLs)){
+			for (const tag of note.tags) {
+				if (tag.toLowerCase().includes(strLs)) {
 					return true
 				}
 			}
@@ -108,11 +108,12 @@
 
 <div class="wrapper">
 	<div>
-		<Search bind:input={searchValue} />
+		<Search disabled={controlsDisabled} bind:input={searchValue} />
 	</div>
 
 	<div>
 		<Select
+			disabled={controlsDisabled}
 			values={selectValues}
 			bind:selected={selectDefault}
 			on:change={(e) => {
@@ -122,14 +123,20 @@
 		/>
 	</div>
 
-	<div>
-		<LightButton disabled={newNoteDisabled} on:click={createNewNote}>Create note</LightButton>
+	<div class="mb-3">
+		<LightButton disabled={controlsDisabled} on:click={createNewNote}>Create note</LightButton>
 	</div>
 
 	<div class="list-container">
 		{#each displayNotes as displayNote (displayNote)}
 			<div>
-				<ListItem selected={selectedNote ? (selectedNote.uid === displayNote.uid) : false} note={displayNote} on:noteDeleted on:noteSelected on:noteUnpinned />
+				<ListItem
+					selected={selectedNote ? selectedNote.uid === displayNote.uid : false}
+					note={displayNote}
+					on:noteDeleted
+					on:noteSelected
+					on:noteUnpinned
+				/>
 			</div>
 		{/each}
 	</div>

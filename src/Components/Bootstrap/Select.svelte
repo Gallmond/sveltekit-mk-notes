@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 
+	export let disabled = false
 	export let label = ''
 	export let values: Record<string, string> = {}
 	export let selected = ''
@@ -23,6 +24,7 @@
 		<label class="input-group-text" for="select">{label}</label>
 	{/if}
 	<select
+		{disabled}
 		bind:this={selectElement}
 		class="form-select"
 		aria-label="Default select example"

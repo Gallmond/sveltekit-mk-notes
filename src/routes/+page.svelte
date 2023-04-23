@@ -23,8 +23,9 @@
 
 		if ($user === null) return
 
-		FireBase.make().deleteUserNote($user, event.detail.note)
-			.then(() => selectedNote = null)
+		FireBase.make()
+			.deleteUserNote($user, event.detail.note)
+			.then(() => (selectedNote = null))
 			.catch(console.error)
 	}
 
@@ -81,17 +82,16 @@
 		allNotes = updatedNotes
 	})
 
-	$:{
-		console.log('page selected note changed', {selectedNote})
+	$: {
+		console.log('page selected note changed', { selectedNote })
 	}
-
 </script>
 
 <div class="wrapper">
 	<div class="left-container">
 		<Left
 			notes={allNotes}
-			selectedNote={selectedNote}
+			{selectedNote}
 			on:noteDeleted={noteDeleted}
 			on:noteSelected={noteSelected}
 			on:noteUnpinned={noteUnpinned}

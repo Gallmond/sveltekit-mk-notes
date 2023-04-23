@@ -10,7 +10,6 @@
 	import Account from './Account.svelte'
 	import type { UserNote } from '../app/Firebase'
 	import { createEventDispatcher, onMount } from 'svelte'
-	import Page from '../routes/+page.svelte'
 
 	/**
 	 * How long in milliseconds to wait until updating the note after user input
@@ -41,6 +40,11 @@
 		inputText = note?.content ?? ''
 		generatedMarkdown = marked(inputText)
 		tags = note?.tags ?? []
+
+		// if neither EDIT or PREVIEW is open, set to both
+		if (!(displayState & Display.PREVIEW) && !(displayState & Display.EDITOR)) {
+			displayState = Display.PREVIEW + Display.EDITOR
+		}
 	}
 
 	/**
@@ -60,22 +64,22 @@
 
 		const getNoteTitle = (note: UserNote, generatedHtml: string): string => {
 			const maxLen = 255
-			
+
 			const parser = new DOMParser()
 			const doc = parser.parseFromString(generatedHtml, 'text/html')
 
 			// get first h1 tag
 			const h1 = doc.querySelectorAll('h1')
-			if(h1.length > 0){
+			if (h1.length > 0) {
 				return h1[0].innerText
 			}
 
 			// get first text content of any node
 			const nodes = doc.childNodes
-			if(nodes.length > 0 && nodes[0].textContent){
+			if (nodes.length > 0 && nodes[0].textContent) {
 				return nodes[0].textContent.substring(0, maxLen)
 			}
-			
+
 			return note.title
 		}
 
@@ -116,16 +120,16 @@
 	const toggleEditor = () => (displayState = displayState ^ Display.EDITOR)
 
 	onMount(() => {
-		document.addEventListener('keydown', e => {
-			if(topButtonsDisabled) return
+		document.addEventListener('keydown', (e) => {
+			if (topButtonsDisabled) return
 
-			if(e.ctrlKey && e.key === 'e'){
-				e.preventDefault();
+			if (e.ctrlKey && e.key === 'e') {
+				e.preventDefault()
 				toggleEditor()
 			}
 
-			if(e.ctrlKey && e.key === 'r'){
-				e.preventDefault();
+			if (e.ctrlKey && e.key === 'r') {
+				e.preventDefault()
 				togglePreview()
 			}
 		})
@@ -137,17 +141,19 @@
 	let topButtonsDisabled = false
 	const setTopButtonsDisabled = () => {
 		// top buttons should be disabled if there is no note OR there is no user
-		topButtonsDisabled = (note === null) || ($user === null)
+		topButtonsDisabled = note === null || $user === null
 	}
-
 
 	let displayName = ''
 	user.subscribe((user) => {
 		setTopButtonsDisabled()
 
-		displayName = user === null
-			? ''
-			: user.displayName === null ? user.email ?? '' : `${user.displayName} <${user.email}>`
+		displayName =
+			user === null
+				? ''
+				: user.displayName === null
+				? user.email ?? ''
+				: `${user.displayName} <${user.email}>`
 	})
 
 	const pinClicked = () => {
@@ -165,8 +171,8 @@
 		dispatchTagsChanged('noteTagsChanged', { note })
 	}
 
-	$:{
-		if(topButtonsDisabled === true && tagsActive === true){
+	$: {
+		if (topButtonsDisabled === true && tagsActive === true) {
 			tagsActive = false
 		}
 	}
@@ -174,7 +180,6 @@
 	$: {
 		console.log('displayState', displayState)
 	}
-
 </script>
 
 <div class="wrapper">
@@ -204,10 +209,7 @@
 						tagsActive = !tagsActive
 					}}>🏷️</LightButton
 				>
-				<LightButton
-					disabled={topButtonsDisabled}
-					on:click={pinClicked}
-				>📌</LightButton>
+				<LightButton disabled={topButtonsDisabled} on:click={pinClicked}>📌</LightButton>
 			</div>
 
 			<div class="buttons-container">
@@ -243,23 +245,15 @@
 			<Settings />
 		{/if}
 
-		<!-- only show the editor or display panes if a note is selected -->
-		{#if note !== null}
-			{#if displayState & Display.EDITOR}
-				<MarkdownEditor bind:value={inputText} />
-			{/if}
-
-			{#if displayState & Display.PREVIEW}
-				<MarkdownPreview html={generatedMarkdown} />
-			{/if}
-		{:else if (displayState !== Display.ACCOUNT) && (displayState !== Display.SETTINGS)}
-			<div class='prompt'>
+		<!-- only show the instructions if the displayState is 0-->
+		{#if displayState === 0}
+			<div class="prompt">
 				<p>Select a note to edit or preview</p>
 				<p>Notes are saved automatically after {SAVE_DELAY_MS / 1000} seconds of inactivity</p>
 				<p>Use the search bar to search by note title or tag</p>
 				<p>Use tags to group together notes</p>
 				<h2>Hotkeys</h2>
-				<table class='table'>
+				<table class="table">
 					<thead>
 						<tr>
 							<th>Key</th><th>Action</th>
@@ -273,7 +267,16 @@
 			</div>
 		{/if}
 
-		
+		<!-- only show the editor or display panes if a note is selected -->
+		{#if note !== null}
+			{#if displayState & Display.EDITOR}
+				<MarkdownEditor bind:value={inputText} />
+			{/if}
+
+			{#if displayState & Display.PREVIEW}
+				<MarkdownPreview html={generatedMarkdown} />
+			{/if}
+		{/if}
 	</div>
 </div>
 
@@ -310,8 +313,8 @@
 		flex-direction: row;
 	}
 
-	.prompt{
-		flex:1;
+	.prompt {
+		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;

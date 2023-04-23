@@ -80,11 +80,11 @@
 		<div class="col buttons-container">
 			<!-- only show if no current user -->
 			{#if currentUser === null}
-				<LightButton on:click={signIn}>Sign in</LightButton><br />
-				<LightButton on:click={signUp}>Sign up</LightButton><br />
+				<LightButton on:click={signIn}>Sign in</LightButton>
+				<LightButton on:click={signUp}>Sign up</LightButton>
 			{:else}
 				<!-- current user should only be able to log out -->
-				<LightButton on:click={signOut}>Sign out</LightButton><br />
+				<LightButton on:click={signOut}>Sign out</LightButton>
 			{/if}
 		</div>
 	</div>
@@ -94,8 +94,6 @@
 	.buttons-container {
 		display: flex;
 		flex-direction: row;
-
-		/* justify-content: center; */
 		justify-content: space-around;
 	}
 
@@ -107,5 +105,9 @@
 		flex-direction: column;
 		align-content: center;
 		max-width: 400px;
+
+		align-self: center;
+		justify-self: center;
+		margin: 0px auto;
 	}
 </style>
