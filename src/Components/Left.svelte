@@ -8,6 +8,7 @@
 	import type { UserNote } from '../app/Firebase'
 
 	export let notes: UserNote[] = []
+	export let selectedNote: UserNote | null = null
 
 	const dispatchCreated = createEventDispatcher<{ noteCreated: { title: string } }>()
 
@@ -80,13 +81,27 @@
 		})
 	}
 	const filterDisplayNotes = (str: string) => {
-		if (str === '') {
+		const strLs = str.toLowerCase()
+
+		if (strLs === '') {
 			displayNotes = allNotes.slice()
 			return
 		}
 
 		displayNotes = allNotes.slice().filter((note) => {
-			return note.title.toLowerCase().includes(str.toLowerCase())
+			// string is in title
+			if(note.title.toLowerCase().includes(strLs.toLowerCase())){
+				return true
+			}
+
+			// string is in a tag
+			for(const tag of note.tags){
+				if(tag.toLowerCase().includes(strLs)){
+					return true
+				}
+			}
+
+			return false
 		})
 	}
 </script>
@@ -114,7 +129,7 @@
 	<div class="list-container">
 		{#each displayNotes as displayNote (displayNote)}
 			<div>
-				<ListItem note={displayNote} on:noteDeleted on:noteSelected on:noteUnpinned />
+				<ListItem selected={selectedNote ? (selectedNote.uid === displayNote.uid) : false} note={displayNote} on:noteDeleted on:noteSelected on:noteUnpinned />
 			</div>
 		{/each}
 	</div>

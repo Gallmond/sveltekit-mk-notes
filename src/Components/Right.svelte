@@ -9,7 +9,14 @@
 	import Settings from './Settings.svelte'
 	import Account from './Account.svelte'
 	import type { UserNote } from '../app/Firebase'
-	import { createEventDispatcher } from 'svelte'
+	import { createEventDispatcher, onMount } from 'svelte'
+	import Page from '../routes/+page.svelte'
+
+	/**
+	 * How long in milliseconds to wait until updating the note after user input
+	 * has ceased
+	 */
+	const SAVE_DELAY_MS = 666
 
 	const dispatchPinned = createEventDispatcher<{ notePinned: { note: UserNote } }>()
 	const dispatchTagsChanged = createEventDispatcher<{ noteTagsChanged: { note: UserNote } }>()
@@ -28,6 +35,7 @@
 	$: {
 		console.log('note changed', { note })
 		setInitialNote(note)
+		setTopButtonsDisabled()
 	}
 	const setInitialNote = (note: UserNote | null): void => {
 		inputText = note?.content ?? ''
@@ -50,13 +58,36 @@
 			clearTimeout(pendingSave)
 		}
 
+		const getNoteTitle = (note: UserNote, generatedHtml: string): string => {
+			const maxLen = 255
+			
+			const parser = new DOMParser()
+			const doc = parser.parseFromString(generatedHtml, 'text/html')
+
+			// get first h1 tag
+			const h1 = doc.querySelectorAll('h1')
+			if(h1.length > 0){
+				return h1[0].innerText
+			}
+
+			// get first text content of any node
+			const nodes = doc.childNodes
+			if(nodes.length > 0 && nodes[0].textContent){
+				return nodes[0].textContent.substring(0, maxLen)
+			}
+			
+			return note.title
+		}
+
 		pendingSave = setTimeout(() => {
 			if (note === null) return
 
 			note.content = inputText
 
+			note.title = getNoteTitle(note, generatedMarkdown)
+
 			dispatchContentChanged('noteContentChanged', { note })
-		}, 3000)
+		}, SAVE_DELAY_MS)
 	}
 
 	// === what to display =====================================================
@@ -84,20 +115,39 @@
 	const togglePreview = () => (displayState = displayState ^ Display.PREVIEW)
 	const toggleEditor = () => (displayState = displayState ^ Display.EDITOR)
 
+	onMount(() => {
+		document.addEventListener('keydown', e => {
+			if(topButtonsDisabled) return
+
+			if(e.ctrlKey && e.key === 'e'){
+				e.preventDefault();
+				toggleEditor()
+			}
+
+			if(e.ctrlKey && e.key === 'r'){
+				e.preventDefault();
+				togglePreview()
+			}
+		})
+	})
+
 	let displayState = Display.PREVIEW + Display.EDITOR
 	// =========================================================================
 
+	let topButtonsDisabled = false
+	const setTopButtonsDisabled = () => {
+		// top buttons should be disabled if there is no note OR there is no user
+		topButtonsDisabled = (note === null) || ($user === null)
+	}
+
+
 	let displayName = ''
 	user.subscribe((user) => {
-		console.log('user updated on Right.svelte', { user })
+		setTopButtonsDisabled()
 
-		if (user === null) {
-			displayName = ''
-			return
-		}
-
-		displayName =
-			user.displayName === null ? user.email ?? '' : `${user.displayName} <${user.email}>`
+		displayName = user === null
+			? ''
+			: user.displayName === null ? user.email ?? '' : `${user.displayName} <${user.email}>`
 	})
 
 	const pinClicked = () => {
@@ -115,9 +165,16 @@
 		dispatchTagsChanged('noteTagsChanged', { note })
 	}
 
+	$:{
+		if(topButtonsDisabled === true && tagsActive === true){
+			tagsActive = false
+		}
+	}
+
 	$: {
 		console.log('displayState', displayState)
 	}
+
 </script>
 
 <div class="wrapper">
@@ -125,6 +182,7 @@
 		<div class="buttons-bar">
 			<div class="buttons-container">
 				<LightButton
+					disabled={topButtonsDisabled}
 					active={containsMasks(displayState, Display.EDITOR)}
 					on:click={() => {
 						clearNonNoteStates()
@@ -132,6 +190,7 @@
 					}}>✏️</LightButton
 				>
 				<LightButton
+					disabled={topButtonsDisabled}
 					active={containsMasks(displayState, Display.PREVIEW)}
 					on:click={() => {
 						clearNonNoteStates()
@@ -139,12 +198,16 @@
 					}}>👁️</LightButton
 				>
 				<LightButton
-					active={tagsActive}
+					disabled={topButtonsDisabled}
+					active={tagsActive && !topButtonsDisabled}
 					on:click={() => {
 						tagsActive = !tagsActive
 					}}>🏷️</LightButton
 				>
-				<LightButton on:click={pinClicked}>📌</LightButton>
+				<LightButton
+					disabled={topButtonsDisabled}
+					on:click={pinClicked}
+				>📌</LightButton>
 			</div>
 
 			<div class="buttons-container">
@@ -180,13 +243,37 @@
 			<Settings />
 		{/if}
 
-		{#if displayState & Display.EDITOR}
-			<MarkdownEditor bind:value={inputText} />
+		<!-- only show the editor or display panes if a note is selected -->
+		{#if note !== null}
+			{#if displayState & Display.EDITOR}
+				<MarkdownEditor bind:value={inputText} />
+			{/if}
+
+			{#if displayState & Display.PREVIEW}
+				<MarkdownPreview html={generatedMarkdown} />
+			{/if}
+		{:else if (displayState !== Display.ACCOUNT) && (displayState !== Display.SETTINGS)}
+			<div class='prompt'>
+				<p>Select a note to edit or preview</p>
+				<p>Notes are saved automatically after {SAVE_DELAY_MS / 1000} seconds of inactivity</p>
+				<p>Use the search bar to search by note title or tag</p>
+				<p>Use tags to group together notes</p>
+				<h2>Hotkeys</h2>
+				<table class='table'>
+					<thead>
+						<tr>
+							<th>Key</th><th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td><kbd>Ctrl</kbd> + <kbd>e</kbd></td><td>Toggle editor</td></tr>
+						<tr><td><kbd>Ctrl</kbd> + <kbd>r</kbd></td><td>Toggle preview</td></tr>
+					</tbody>
+				</table>
+			</div>
 		{/if}
 
-		{#if displayState & Display.PREVIEW}
-			<MarkdownPreview html={generatedMarkdown} />
-		{/if}
+		
 	</div>
 </div>
 
@@ -221,6 +308,17 @@
 
 		display: flex;
 		flex-direction: row;
+	}
+
+	.prompt{
+		flex:1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+	}
+	.prompt > p {
+		text-align: center;
 	}
 
 	.utility-bar {
