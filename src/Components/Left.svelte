@@ -130,9 +130,6 @@
 			disabled={controlsDisabled}
 			values={selectValues}
 			bind:selected={selectDefault}
-			on:change={(e) => {
-				console.log('select changed', { e })
-			}}
 			label="order by"
 		/>
 	</div>
