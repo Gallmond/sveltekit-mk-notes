@@ -58,7 +58,18 @@
 	}
 
 	const sortDisplayNotes = (by: SelectEnum) => {
-		displayNotes = allNotes.slice().sort((a, b) => {
+		/**
+		 * Separate our notes into pinned and unpinned groups
+		 */
+		const pinnedNotes: UserNote[] = []
+		const unPinnedNotes: UserNote[] = []
+
+		for (const note of allNotes) {
+			note.pinned ? pinnedNotes.push(note) : unPinnedNotes.push(note)
+		}
+
+		// create a sorter
+		const sorter = (a: UserNote, b: UserNote): number => {
 			if (by === 'title') {
 				if (a.title < b.title) return -1
 				if (a.title > b.title) return 1
@@ -78,7 +89,10 @@
 			}
 
 			return 0
-		})
+		}
+
+		// sort them both but make sure pins are first
+		displayNotes = [...pinnedNotes.sort(sorter), ...unPinnedNotes.sort(sorter)]
 	}
 	const filterDisplayNotes = (str: string) => {
 		const strLs = str.toLowerCase()
