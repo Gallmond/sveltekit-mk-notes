@@ -162,7 +162,7 @@
 				togglePreview()
 			}
 
-			if(e.ctrlKey && e.key === 'c'){
+			if (e.ctrlKey && e.key === 'c') {
 				e.preventDefault()
 				createNewNote()
 			}
@@ -189,7 +189,7 @@
 				? user.email ?? ''
 				: `${user.displayName} <${user.email}>`
 
-		if(user === null){
+		if (user === null) {
 			displayState = Display.ACCOUNT
 		}
 	})
@@ -296,10 +296,9 @@
 			{/if}
 
 			{#if !(displayState & Display.EDITOR) && !(displayState & Display.PREVIEW)}
-				<InstructionsPane SAVE_DELAY_MS={SAVE_DELAY_MS}/>
+				<InstructionsPane {SAVE_DELAY_MS} />
 			{/if}
 		{/if}
-
 	</div>
 </div>
 

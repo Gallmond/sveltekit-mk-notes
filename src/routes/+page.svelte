@@ -80,7 +80,6 @@
 	notes.subscribe((updatedNotes) => {
 		allNotes = updatedNotes
 	})
-
 </script>
 
 <div class="wrapper">

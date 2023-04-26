@@ -227,9 +227,9 @@ class FireBase {
 	public async deleteAllUserNotes(user: User): Promise<void> {
 		const batch = writeBatch(this.store)
 
-		const notes = await this.getUserNotes( user )
+		const notes = await this.getUserNotes(user)
 
-		for(const note of notes){
+		for (const note of notes) {
 			batch.delete(this.noteRef(user, note))
 		}
 

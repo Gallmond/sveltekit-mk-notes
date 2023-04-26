@@ -1,29 +1,35 @@
 <script lang="ts">
-	import { onMount } from "svelte"
-	import Card from "./Bootstrap/Card.svelte"
-	import LightButton from "./Bootstrap/LightButton.svelte"
-	import FireBase from "../app/Firebase"
-	import { user } from "$stores/user"
+	import { onMount } from 'svelte'
+	import Card from './Bootstrap/Card.svelte'
+	import LightButton from './Bootstrap/LightButton.svelte'
+	import FireBase from '../app/Firebase'
+	import { user } from '$stores/user'
 
 	const fb = FireBase.make()
 
-	let deleteAllNotes = () => {}
-	let deleteAccount = () => {}
+	let deleteAllNotes = () => {
+		/* do nothing */
+	}
+	let deleteAccount = () => {
+		/* do nothing */
+	}
 
 	const confirmPrompt = (msg: string, confirmText: string): boolean => {
 		return confirmText === window.prompt(`${msg}.\r\n\r\nType "${confirmText}" to confirm\r\n\r\n`)
 	}
 
-	onMount(()=>{
+	onMount(() => {
 		deleteAllNotes = () => {
-			if(!confirmPrompt(
-				"Are you sure you want to delete all your notes? This cannot be undone.",
-				"delete my notes"
-			)){
+			if (
+				!confirmPrompt(
+					'Are you sure you want to delete all your notes? This cannot be undone.',
+					'delete my notes'
+				)
+			) {
 				return
 			}
 
-			if($user === null) return
+			if ($user === null) return
 
 			fb.deleteAllUserNotes($user)
 				.then(() => {
@@ -32,14 +38,16 @@
 				.catch(console.error)
 		}
 		deleteAccount = () => {
-			if(!confirmPrompt(
-				"Are you sure you want to delete your account? This cannot be undone.",
-				"delete my account"
-			)){
+			if (
+				!confirmPrompt(
+					'Are you sure you want to delete your account? This cannot be undone.',
+					'delete my account'
+				)
+			) {
 				return
 			}
 
-			if($user === null) return
+			if ($user === null) return
 
 			fb.deleteUser($user)
 				.then(() => {
@@ -48,40 +56,33 @@
 				.catch(console.error)
 		}
 	})
-
-
 </script>
+
 <div class="settings-container">
-	<Card styles={{'background-color' : '#e88e84'}}>
+	<Card styles={{ 'background-color': '#e88e84' }}>
 		<div class="buttons">
 			<div class="button mb-3">
-				<LightButton
-					on:click={deleteAllNotes}
-				>Delete All Notes</LightButton>
+				<LightButton on:click={deleteAllNotes}>Delete All Notes</LightButton>
 			</div>
 			<div class="button mb-3">
-				<LightButton
-					on:click={deleteAccount}
-				>Delete Account</LightButton>
+				<LightButton on:click={deleteAccount}>Delete Account</LightButton>
 			</div>
 		</div>
 	</Card>
 </div>
 
 <style>
-	
-	.button{
+	.button {
 		display: flex;
 	}
 
-	.buttons{
+	.buttons {
 		display: flex;
 		margin: 50px;
 
 		align-items: center;
 		flex-direction: column;
 	}
-
 
 	.settings-container {
 		padding: 4px;
