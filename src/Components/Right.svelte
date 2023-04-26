@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { user } from '$stores/user'
+	import { user, notes } from '$stores/user'
 	import LightButton from './Bootstrap/LightButton.svelte'
 	import { marked } from 'marked'
 	import Tags from './Tags.svelte'
@@ -26,6 +26,20 @@
 	let inputText = ''
 	let generatedMarkdown = ''
 	let tags: Tag[] = []
+	let notePinned = note?.pinned ?? false
+
+	/**
+	 * //TODO refactor this it smells of workaround
+	 *
+	 * Why can't we get the note pinned state from the passed in note at all times?
+	 */
+	notes.subscribe((updatedNotes) => {
+		for (const updatedNote of updatedNotes) {
+			if (updatedNote.uid === note?.uid) {
+				notePinned = updatedNote.pinned
+			}
+		}
+	})
 
 	/**
 	 * When the component's note changes, set the input text and generated
@@ -45,6 +59,9 @@
 		if (!(displayState & Display.PREVIEW) && !(displayState & Display.EDITOR)) {
 			displayState = Display.PREVIEW + Display.EDITOR
 		}
+
+		// if this note is pinned, the pinned bar should be active
+		notePinned = note?.pinned ?? false
 	}
 
 	/**
@@ -209,7 +226,9 @@
 						tagsActive = !tagsActive
 					}}>🏷️</LightButton
 				>
-				<LightButton disabled={topButtonsDisabled} on:click={pinClicked}>📌</LightButton>
+				<LightButton disabled={topButtonsDisabled} active={notePinned} on:click={pinClicked}
+					>📌</LightButton
+				>
 			</div>
 
 			<div class="buttons-container">

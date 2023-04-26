@@ -8,7 +8,6 @@
 
 ### Functionality
 
-- If a current note is pinned, the pin button on the top bar should be active
 - Should be able to press enter to create a new tag instead of clicking add
 - Settings page
   - Delete account button
