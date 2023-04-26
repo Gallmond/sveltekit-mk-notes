@@ -78,13 +78,9 @@
 
 	let allNotes: UserNote[] = []
 	notes.subscribe((updatedNotes) => {
-		console.log('page notes sub triggered', { updatedNotes })
 		allNotes = updatedNotes
 	})
 
-	$: {
-		console.log('page selected note changed', { selectedNote })
-	}
 </script>
 
 <div class="wrapper">
@@ -104,6 +100,7 @@
 			on:notePinned={notePinned}
 			on:noteTagsChanged={noteTagsChanged}
 			on:noteContentChanged={noteContentChanged}
+			on:noteCreated={noteCreated}
 		/>
 	</div>
 </div>

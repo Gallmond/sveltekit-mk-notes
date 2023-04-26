@@ -8,12 +8,6 @@
 
 ### Functionality
 
-- Should be able to press enter to create a new tag instead of clicking add
-- Settings page
-  - Delete account button
-  - Delete all notes button
-- Add CTRL + N for new note shortcut
-- On first load, if not logged in the account page should be displayed
 - remove all debug console logs and refactor
 
 ### Visuals

@@ -10,6 +10,7 @@
 	import Account from './Account.svelte'
 	import type { UserNote } from '../app/Firebase'
 	import { createEventDispatcher, onMount } from 'svelte'
+	import InstructionsPane from './InstructionsPane.svelte'
 
 	/**
 	 * How long in milliseconds to wait until updating the note after user input
@@ -20,6 +21,17 @@
 	const dispatchPinned = createEventDispatcher<{ notePinned: { note: UserNote } }>()
 	const dispatchTagsChanged = createEventDispatcher<{ noteTagsChanged: { note: UserNote } }>()
 	const dispatchContentChanged = createEventDispatcher<{ noteContentChanged: { note: UserNote } }>()
+	const dispatchCreated = createEventDispatcher<{ noteCreated: { title: string } }>()
+
+	const createNewNote = async () => {
+		if ($user === null) return
+
+		const time = new Intl.DateTimeFormat('en-gb', {
+			timeStyle: 'short'
+		}).format(new Date()) // 05:30
+
+		dispatchCreated('noteCreated', { title: `Note ${time}` })
+	}
 
 	export let note: UserNote | null = null
 
@@ -149,6 +161,11 @@
 				e.preventDefault()
 				togglePreview()
 			}
+
+			if(e.ctrlKey && e.key === 'c'){
+				e.preventDefault()
+				createNewNote()
+			}
 		})
 	})
 
@@ -171,6 +188,10 @@
 				: user.displayName === null
 				? user.email ?? ''
 				: `${user.displayName} <${user.email}>`
+
+		if(user === null){
+			displayState = Display.ACCOUNT
+		}
 	})
 
 	const pinClicked = () => {
@@ -264,28 +285,6 @@
 			<Settings />
 		{/if}
 
-		<!-- only show the instructions if the displayState is 0-->
-		{#if displayState === 0}
-			<div class="prompt">
-				<p>Select a note to edit or preview</p>
-				<p>Notes are saved automatically after {SAVE_DELAY_MS / 1000} seconds of inactivity</p>
-				<p>Use the search bar to search by note title or tag</p>
-				<p>Use tags to group together notes</p>
-				<h2>Hotkeys</h2>
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Key</th><th>Action</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr><td><kbd>Ctrl</kbd> + <kbd>e</kbd></td><td>Toggle editor</td></tr>
-						<tr><td><kbd>Ctrl</kbd> + <kbd>r</kbd></td><td>Toggle preview</td></tr>
-					</tbody>
-				</table>
-			</div>
-		{/if}
-
 		<!-- only show the editor or display panes if a note is selected -->
 		{#if note !== null}
 			{#if displayState & Display.EDITOR}
@@ -295,7 +294,12 @@
 			{#if displayState & Display.PREVIEW}
 				<MarkdownPreview html={generatedMarkdown} />
 			{/if}
+
+			{#if !(displayState & Display.EDITOR) && !(displayState & Display.PREVIEW)}
+				<InstructionsPane SAVE_DELAY_MS={SAVE_DELAY_MS}/>
+			{/if}
 		{/if}
+
 	</div>
 </div>
 
@@ -330,17 +334,6 @@
 
 		display: flex;
 		flex-direction: row;
-	}
-
-	.prompt {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-direction: column;
-	}
-	.prompt > p {
-		text-align: center;
 	}
 
 	.utility-bar {

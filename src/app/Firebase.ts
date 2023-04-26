@@ -25,7 +25,8 @@ import {
 	QueryDocumentSnapshot,
 	onSnapshot,
 	type Unsubscribe,
-	deleteDoc
+	deleteDoc,
+	writeBatch
 } from 'firebase/firestore'
 
 // Your web app's Firebase configuration
@@ -210,6 +211,29 @@ class FireBase {
 			})
 			callback(notes)
 		})
+	}
+
+	public async deleteUser(user: User): Promise<void> {
+		// delete user's notes
+		await this.deleteAllUserNotes(user)
+
+		// delete user doc
+		await deleteDoc(doc(this.store, 'users', user.uid))
+
+		// delete auth user
+		return user.delete()
+	}
+
+	public async deleteAllUserNotes(user: User): Promise<void> {
+		const batch = writeBatch(this.store)
+
+		const notes = await this.getUserNotes( user )
+
+		for(const note of notes){
+			batch.delete(this.noteRef(user, note))
+		}
+
+		return batch.commit()
 	}
 
 	public async deleteUserNote(user: User, note: UserNote): Promise<void> {
