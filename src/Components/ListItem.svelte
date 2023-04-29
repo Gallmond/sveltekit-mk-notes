@@ -11,8 +11,20 @@
 	export let note: UserNote
 	export let selected = false
 
+	const formatDate = (date: Date): string => {
+		const year = date.getFullYear()
+		const month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+		const day = date.getDate()
+
+		const hh = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()
+
+		const mm = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
+
+		return `${year}-${month}-${day} ${hh}:${mm}`
+	}
+
 	const title = note.title
-	const date = note.createdAt.toISOString().split('T')[0]
+	const date = formatDate(note.createdAt)
 	const tags = note.tags
 	const pinned = note.pinned
 
@@ -88,7 +100,7 @@
 	}
 
 	.tag-container {
-		margin-left: 0.25em;
+		/* margin-left: 0.25em; */
 	}
 
 	.date-container {
@@ -127,5 +139,6 @@
 
 	.icons {
 		white-space: nowrap;
+		margin-right: 2px;
 	}
 </style>

@@ -4,5 +4,6 @@
 <style>
 	button {
 		border: 0;
+		margin-right: 2px;
 	}
 </style>

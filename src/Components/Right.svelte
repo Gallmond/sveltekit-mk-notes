@@ -251,6 +251,7 @@
 				<small>{displayName}</small>
 				<LightButton
 					active={displayState === Display.SETTINGS}
+					disabled={$user === null}
 					on:click={() => {
 						displayState = Display.SETTINGS
 					}}>⚙️</LightButton
@@ -266,7 +267,9 @@
 
 		<div class="utility-bar">
 			{#if tagsActive}
-				<Tags {tags} onChange={tagsChanged} />
+				<div class="tags-container mt-2">
+					<Tags {tags} onChange={tagsChanged} />
+				</div>
 			{/if}
 		</div>
 	</div>
