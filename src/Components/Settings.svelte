@@ -4,15 +4,12 @@
 	import LightButton from './Bootstrap/LightButton.svelte'
 	import FireBase from '../app/Firebase'
 	import { user } from '$stores/user'
+	import type { Func } from '../app/types'
 
 	const fb = FireBase.make()
 
-	let deleteAllNotes = () => {
-		/* do nothing */
-	}
-	let deleteAccount = () => {
-		/* do nothing */
-	}
+	let deleteAllNotes: Func = () => null
+	let deleteAccount: Func = () => null
 
 	const confirmPrompt = (msg: string, confirmText: string): boolean => {
 		return confirmText === window.prompt(`${msg}\r\n\r\nType "${confirmText}" to confirm\r\n\r\n`)
@@ -21,6 +18,7 @@
 	onMount(() => {
 		deleteAllNotes = () => {
 			if (
+				$user === null ||
 				!confirmPrompt(
 					'Are you sure you want to delete all your notes? This cannot be undone.',
 					'delete my notes'
@@ -29,16 +27,13 @@
 				return
 			}
 
-			if ($user === null) return
-
 			fb.deleteAllUserNotes($user)
-				.then(() => {
-					alert('Notes deleted')
-				})
+				.then(() => alert('Notes deleted'))
 				.catch(console.error)
 		}
 		deleteAccount = () => {
 			if (
+				$user === null ||
 				!confirmPrompt(
 					'Are you sure you want to delete your account? This cannot be undone.',
 					'delete my account'
@@ -47,12 +42,8 @@
 				return
 			}
 
-			if ($user === null) return
-
 			fb.deleteUser($user)
-				.then(() => {
-					alert('account deleted!')
-				})
+				.then(() => alert('account deleted!'))
 				.catch(console.error)
 		}
 	})

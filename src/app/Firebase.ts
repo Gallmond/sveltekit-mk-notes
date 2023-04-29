@@ -109,9 +109,9 @@ class FireBase {
 	app: FirebaseApp
 	auth: Auth
 	store: Firestore
+
 	currentUser: User | null = null
 	authStateChangedCallbacks: AuthStateChangedCallback[] = []
-
 	notesListenerUnsubscribe: Unsubscribe | null = null
 
 	localEnvironments = ['local', 'development']
@@ -125,29 +125,15 @@ class FireBase {
 	}
 
 	constructor() {
-		console.debug('Firebase.constructor()')
-
 		this.app = initializeApp(firebaseConfig)
-
 		this.auth = getAuth(this.app)
 		this.store = getFirestore(this.app)
 
-		if (this.localEnvironments.includes(process.env.NODE_ENV ?? '')) this.localMode()
+		if (this.localEnvironments.includes(process.env.NODE_ENV ?? '')) {
+			connectAuthEmulator(this.auth, `${EMULATOR_AUTH_URL}:${EMULATOR_AUTH_PORT}`)
+			connectFirestoreEmulator(this.store, EMULATOR_FIRESTORE_URL, EMULATOR_FIRESTORE_PORT)
+		}
 
-		this.attachListeners()
-	}
-
-	private localMode() {
-		console.debug('Firebase class entering local mode')
-		this.attachEmulators()
-	}
-
-	private attachEmulators() {
-		connectAuthEmulator(this.auth, `${EMULATOR_AUTH_URL}:${EMULATOR_AUTH_PORT}`)
-		connectFirestoreEmulator(this.store, EMULATOR_FIRESTORE_URL, EMULATOR_FIRESTORE_PORT)
-	}
-
-	private attachListeners() {
 		onAuthStateChanged(this.auth, (user: User | null) => {
 			this.currentUser = user
 
@@ -159,14 +145,6 @@ class FireBase {
 
 	public addOnAuthChangeHandler(handler: (user: User | null) => void) {
 		this.authStateChangedCallbacks.push(handler)
-	}
-
-	public getCurrentUser(): User {
-		if (this.currentUser === null) {
-			throw new Error('No current user')
-		}
-
-		return this.currentUser
 	}
 
 	private notesRef(user: User): CollectionReference<UserNote> {
@@ -186,15 +164,11 @@ class FireBase {
 	}
 
 	public async getUserNotes(user: User): Promise<UserNote[]> {
-		console.debug('Firebase.getUserNotes')
-
 		const querySnapshot = await getDocs(this.notesRef(user))
 		const userNotes: UserNote[] = []
 		querySnapshot.forEach((thisDoc) => {
 			userNotes.push(thisDoc.data())
 		})
-
-		console.debug(`got ${userNotes.length} notes`, { userNotes })
 
 		return userNotes
 	}

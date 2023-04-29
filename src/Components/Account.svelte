@@ -64,10 +64,8 @@
 
 	const signOut = () => {
 		fb.signOut()
-			.then(() => {
-				updateCurrentUser()
-			})
-			.catch(console.error)
+			.then(() => updateCurrentUser())
+			.catch(handleAuthErr)
 	}
 </script>
 

@@ -4,9 +4,7 @@
 	import type { Tag } from '../app/types'
 
 	export let tags: Tag[] = []
-	export let onChange: (tags: Tag[]) => void = () => {
-		// do nothing
-	}
+	export let onChange: (tags: Tag[]) => void = () => null
 
 	let newTagInput = ''
 
@@ -44,10 +42,6 @@
 </div>
 <div class="utility-item">
 	{#each tags as tag, i}
-		<Badge
-			on:click={() => {
-				deleteTag(tag)
-			}}>{tag}</Badge
-		>
+		<Badge on:click={() => deleteTag(tag)}>{tag}</Badge>
 	{/each}
 </div>

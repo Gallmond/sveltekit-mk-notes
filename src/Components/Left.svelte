@@ -6,6 +6,7 @@
 	import { user } from '$stores/user'
 	import { createEventDispatcher } from 'svelte'
 	import type { UserNote } from '../app/Firebase'
+	import { timeString } from '../app/utils'
 
 	export let notes: UserNote[] = []
 	export let selectedNote: UserNote | null = null
@@ -34,7 +35,6 @@
 	let allNotes: UserNote[] = []
 	let displayNotes: UserNote[] = []
 	user.subscribe((user) => {
-		console.debug('Left.svelte, user writable changed', { user })
 		controlsDisabled = user === null
 	})
 
@@ -46,15 +46,9 @@
 	const createNewNote = async () => {
 		if ($user === null) return
 
-		const time = new Intl.DateTimeFormat('en-gb', {
-			timeStyle: 'short'
-		}).format(new Date()) // 05:30
-
-		const n = notes.length
-
-		const title = `Note ${n} (${time})`
-
-		dispatchCreated('noteCreated', { title })
+		dispatchCreated('noteCreated', {
+			title: `Note ${notes.length} (${timeString()})`
+		})
 	}
 
 	const sortDisplayNotes = (by: SelectEnum) => {
@@ -95,22 +89,22 @@
 		displayNotes = [...pinnedNotes.sort(sorter), ...unPinnedNotes.sort(sorter)]
 	}
 	const filterDisplayNotes = (str: string) => {
-		const strLs = str.toLowerCase()
+		const searchTerm = str.toLowerCase()
 
-		if (strLs === '') {
+		if (searchTerm === '') {
 			displayNotes = allNotes.slice()
 			return
 		}
 
 		displayNotes = allNotes.slice().filter((note) => {
 			// string is in title
-			if (note.title.toLowerCase().includes(strLs.toLowerCase())) {
+			if (note.title.toLowerCase().includes(searchTerm.toLowerCase())) {
 				return true
 			}
 
 			// string is in a tag
 			for (const tag of note.tags) {
-				if (tag.toLowerCase().includes(strLs)) {
+				if (tag.toLowerCase().includes(searchTerm)) {
 					return true
 				}
 			}

@@ -2,15 +2,12 @@
 
 ## BACKLOG
 
-- Handle firebase errors (registry and sign-in etc. Currently there's no handling)
-
 ## TODO
+
+- move the list item tags to a line of their own, and allow wrapping
+- make enter work to create new tag
+- check what happens to tags line if it reaches the width of the page
 
 ### Functionality
 
-- the display panes are still messed up. The instuctions show up when it shouldn't
-  and sometimes stuff displays while logged out when it shouldn't
-
 ### Visuals
-
-- The tags overflow in the side bar. Make it truncate with an ... or some other indicator that there's more?

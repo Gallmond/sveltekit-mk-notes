@@ -11,6 +11,7 @@
 	import type { UserNote } from '../app/Firebase'
 	import { createEventDispatcher, onMount } from 'svelte'
 	import InstructionsPane from './InstructionsPane.svelte'
+	import { debounce, getNoteTitle, getUserDisplayName, hasMasks, timeString } from '../app/utils'
 
 	/**
 	 * How long in milliseconds to wait until updating the note after user input
@@ -26,11 +27,7 @@
 	const createNewNote = async () => {
 		if ($user === null) return
 
-		const time = new Intl.DateTimeFormat('en-gb', {
-			timeStyle: 'short'
-		}).format(new Date()) // 05:30
-
-		dispatchCreated('noteCreated', { title: `Note ${time}` })
+		dispatchCreated('noteCreated', { title: `Note ${timeString()}` })
 	}
 
 	export let note: UserNote | null = null
@@ -77,49 +74,27 @@
 
 	/**
 	 * when the input text changes (from user input) also update the markdown
-	 * and trigger an update to save in 2 seconds of inactivity
+	 * and trigger an update to save in x seconds of inactivity
 	 */
-	let pendingSave: NodeJS.Timeout | null = null // eslint-disable-line no-undef
 	$: {
 		generatedMarkdown = marked(inputText)
 		initiateSave()
 	}
+	const parser = new DOMParser()
 	const initiateSave = () => {
-		console.debug('initiateSave')
-		if (pendingSave !== null) {
-			clearTimeout(pendingSave)
-		}
+		debounce(
+			'save',
+			() => {
+				if (note === null) return
 
-		const getNoteTitle = (note: UserNote, generatedHtml: string): string => {
-			const maxLen = 255
+				note.content = inputText
 
-			const parser = new DOMParser()
-			const doc = parser.parseFromString(generatedHtml, 'text/html')
+				note.title = getNoteTitle(parser, note, generatedMarkdown)
 
-			// get first h1 tag
-			const h1 = doc.querySelectorAll('h1')
-			if (h1.length > 0) {
-				return h1[0].innerText
-			}
-
-			// get first text content of any node
-			const nodes = doc.childNodes
-			if (nodes.length > 0 && nodes[0].textContent) {
-				return nodes[0].textContent.substring(0, maxLen)
-			}
-
-			return note.title
-		}
-
-		pendingSave = setTimeout(() => {
-			if (note === null) return
-
-			note.content = inputText
-
-			note.title = getNoteTitle(note, generatedMarkdown)
-
-			dispatchContentChanged('noteContentChanged', { note })
-		}, SAVE_DELAY_MS)
+				dispatchContentChanged('noteContentChanged', { note })
+			},
+			SAVE_DELAY_MS
+		)
 	}
 
 	// === what to display =====================================================
@@ -130,22 +105,19 @@
 		PREVIEW = 0b1000 // 8
 	}
 
-	const containsMasks = (test: number, ...masks: Display[]): boolean => {
-		let valid = 0
-		for (const mask of masks) {
-			if (test & mask) valid++
-		}
-
-		return valid === masks.length
-	}
-
 	const clearNonNoteStates = () => {
 		displayState &= ~Display.SETTINGS
 		displayState &= ~Display.ACCOUNT
 	}
 
-	const togglePreview = () => (displayState = displayState ^ Display.PREVIEW)
-	const toggleEditor = () => (displayState = displayState ^ Display.EDITOR)
+	const togglePreview = () => {
+		clearNonNoteStates()
+		displayState = displayState ^ Display.PREVIEW
+	}
+	const toggleEditor = () => {
+		clearNonNoteStates()
+		displayState = displayState ^ Display.EDITOR
+	}
 
 	onMount(() => {
 		document.addEventListener('keydown', (e) => {
@@ -168,7 +140,11 @@
 		})
 	})
 
-	let displayState = Display.PREVIEW + Display.EDITOR
+	/**
+	 * signed-in: preview & editor
+	 * signed-out: account
+	 */
+	let displayState: number = Display.ACCOUNT
 	// =========================================================================
 
 	let topButtonsDisabled = false
@@ -179,18 +155,13 @@
 
 	let displayName = ''
 	user.subscribe((user) => {
+		console.log('Right.svelte user.subscribe', { user })
+
+		displayName = getUserDisplayName(user)
+
+		displayState = user === null ? Display.ACCOUNT : Display.EDITOR + Display.PREVIEW
+
 		setTopButtonsDisabled()
-
-		displayName =
-			user === null
-				? ''
-				: user.displayName === null
-				? user.email ?? ''
-				: `${user.displayName} <${user.email}>`
-
-		if (user === null) {
-			displayState = Display.ACCOUNT
-		}
 	})
 
 	const pinClicked = () => {
@@ -221,7 +192,7 @@
 			<div class="buttons-container">
 				<LightButton
 					disabled={topButtonsDisabled}
-					active={containsMasks(displayState, Display.EDITOR)}
+					active={hasMasks(displayState, Display.EDITOR)}
 					on:click={() => {
 						clearNonNoteStates()
 						toggleEditor()
@@ -229,7 +200,7 @@
 				>
 				<LightButton
 					disabled={topButtonsDisabled}
-					active={containsMasks(displayState, Display.PREVIEW)}
+					active={hasMasks(displayState, Display.PREVIEW)}
 					on:click={() => {
 						clearNonNoteStates()
 						togglePreview()
@@ -275,6 +246,10 @@
 	</div>
 
 	<div class="content-container">
+		{#if displayState === 0}
+			<InstructionsPane {SAVE_DELAY_MS} />
+		{/if}
+
 		{#if displayState === Display.ACCOUNT}
 			<Account />
 		{/if}
@@ -291,10 +266,6 @@
 
 			{#if displayState & Display.PREVIEW}
 				<MarkdownPreview html={generatedMarkdown} />
-			{/if}
-
-			{#if !(displayState & Display.EDITOR) && !(displayState & Display.PREVIEW)}
-				<InstructionsPane {SAVE_DELAY_MS} />
 			{/if}
 		{/if}
 	</div>

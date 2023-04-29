@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { UserNote } from '../app/Firebase'
+	import type { Func } from '../app/types'
+	import { dateTimeString } from '../app/utils'
 	import Badge from './Bootstrap/Badge.svelte'
 	import Card from './Bootstrap/Card.svelte'
 	import LightButton from './Bootstrap/LightButton.svelte'
@@ -11,46 +13,27 @@
 	export let note: UserNote
 	export let selected = false
 
-	const formatDate = (date: Date): string => {
-		const year = date.getFullYear()
-		const month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
-		const day = date.getDate()
-
-		const hh = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()
-
-		const mm = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
-
-		return `${year}-${month}-${day} ${hh}:${mm}`
-	}
-
 	const title = note.title
-	const date = formatDate(note.createdAt)
+	const date = dateTimeString(note.createdAt)
 	const tags = note.tags
 	const pinned = note.pinned
 
-	type Func = () => void
 	let deleteClicked: Func | null = null
 	let noteClicked: Func | null = null
 	let pinClicked: Func | null = null
 	onMount(() => {
-		deleteClicked = () => {
-			if (!confirm('Are you sure you want to delete this note?')) {
-				return
-			}
-
-			dispatchDelete('noteDeleted', { note })
-		}
-
 		noteClicked = () => {
 			dispatchSelected('noteSelected', { note })
 		}
 
 		pinClicked = () => {
-			if (!confirm('Are you sure you want to unpin this note?')) {
-				return
-			}
+			confirm('Are you sure you want to unpin this note?') &&
+				dispatchUnpinned('noteUnpinned', { note })
+		}
 
-			dispatchUnpinned('noteUnpinned', { note })
+		deleteClicked = () => {
+			confirm('Are you sure you want to delete this note?') &&
+				dispatchDelete('noteDeleted', { note })
 		}
 	})
 
@@ -97,10 +80,6 @@
 	.tags-container {
 		display: flex;
 		flex-direction: row;
-	}
-
-	.tag-container {
-		/* margin-left: 0.25em; */
 	}
 
 	.date-container {
