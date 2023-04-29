@@ -57,7 +57,7 @@
 		if ($user === null) return
 
 		const title = event.detail.title
-		const content = ['# Header', '## Subheader', 'Some regular text!'].join('\r\n\r\n')
+		const content = [`# ${title}`, '## Subheader', 'Some regular text!'].join('\r\n\r\n')
 
 		FireBase.make().createUserNote($user, title, content)
 	}

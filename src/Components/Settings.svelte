@@ -15,7 +15,7 @@
 	}
 
 	const confirmPrompt = (msg: string, confirmText: string): boolean => {
-		return confirmText === window.prompt(`${msg}.\r\n\r\nType "${confirmText}" to confirm\r\n\r\n`)
+		return confirmText === window.prompt(`${msg}\r\n\r\nType "${confirmText}" to confirm\r\n\r\n`)
 	}
 
 	onMount(() => {

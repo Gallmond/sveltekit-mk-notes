@@ -121,8 +121,13 @@
 </script>
 
 <div class="wrapper">
-	<div>
-		<Search disabled={controlsDisabled} bind:input={searchValue} />
+	<div class="search-create-container">
+		<div class="search-holder">
+			<Search disabled={controlsDisabled} bind:input={searchValue} />
+		</div>
+		<div class="create-holder mb-3">
+			<LightButton disabled={controlsDisabled} on:click={createNewNote}>Create note</LightButton>
+		</div>
 	</div>
 
 	<div>
@@ -132,10 +137,6 @@
 			bind:selected={selectDefault}
 			label="order by"
 		/>
-	</div>
-
-	<div class="mb-3">
-		<LightButton disabled={controlsDisabled} on:click={createNewNote}>Create note</LightButton>
 	</div>
 
 	<div class="list-container">
@@ -154,6 +155,21 @@
 </div>
 
 <style>
+	.search-create-container {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+
+	.search-holder {
+		margin-right: 3px;
+		flex: 2;
+	}
+	.create-holder {
+		display: flex;
+		justify-content: end;
+	}
+
 	.list-container > div {
 		margin-bottom: 0.75em;
 	}

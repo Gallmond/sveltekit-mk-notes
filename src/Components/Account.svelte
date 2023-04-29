@@ -4,20 +4,7 @@
 	import type { User } from 'firebase/auth'
 	import TextInput from './Bootstrap/TextInput.svelte'
 	import PasswordInput from './Bootstrap/PasswordInput.svelte'
-
-	const debugCreateNote = () => {
-		const currentUser = fb.getCurrentUser()
-
-		fb.createUserNote(currentUser, 'test note', '<h1>test note content</h1>', ['foo', 'bar'])
-			.then(() => {
-				console.log('note created check emulator')
-
-				fb.getUserNotes(currentUser).then((notes) => {
-					console.log('gotUserNotes', notes)
-				})
-			})
-			.catch()
-	}
+	import { FirebaseError } from 'firebase/app'
 
 	const fb = FireBase.make()
 
@@ -34,36 +21,50 @@
 		passwordInput = ''
 	}
 
-	const signUp = () => {
-		if (passwordInput.length < 12) console.log('short password')
+	const handleAuthErr = (error: Error) => {
+		console.error('handleAuthErr', { e: error })
+		let msg = 'Something went wrong trying to authenticate'
 
+		if (error instanceof FirebaseError) {
+			if (
+				['auth/user-not-found', 'auth/wrong-password', 'auth/email-already-exists'].includes(
+					error.code
+				)
+			) {
+				msg = 'Invalid email or password'
+			} else if (error.code === 'auth/invalid-email') {
+				msg = 'Please enter a valid email'
+			} else if (error.code === 'auth/weak-password') {
+				msg = 'Password too weak'
+			}
+		}
+
+		alert(msg)
+
+		clearInputs()
+	}
+
+	const signUp = () => {
 		fb.signUp(emailInput, passwordInput)
-			.then((user) => {
-				console.log('user has signed up', { user })
+			.then(() => {
 				updateCurrentUser()
 				clearInputs()
-
-				debugCreateNote()
 			})
-			.catch(console.error)
+			.catch(handleAuthErr)
 	}
 
 	const signIn = () => {
-		console.log('signIn', { emailInput, passwordInput })
-
 		fb.signIn(emailInput, passwordInput)
-			.then((user) => {
-				console.log('user has signed in', { user })
+			.then(() => {
 				updateCurrentUser()
 				clearInputs()
 			})
-			.catch(console.error)
+			.catch(handleAuthErr)
 	}
 
 	const signOut = () => {
 		fb.signOut()
 			.then(() => {
-				console.log('user has signed out')
 				updateCurrentUser()
 			})
 			.catch(console.error)

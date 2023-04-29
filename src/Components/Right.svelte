@@ -58,7 +58,6 @@
 	 * markdown
 	 */
 	$: {
-		console.log('note changed', { note })
 		setInitialNote(note)
 		setTopButtonsDisabled()
 	}
@@ -213,10 +212,6 @@
 		if (topButtonsDisabled === true && tagsActive === true) {
 			tagsActive = false
 		}
-	}
-
-	$: {
-		console.log('displayState', displayState)
 	}
 </script>
 
