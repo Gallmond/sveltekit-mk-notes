@@ -75,8 +75,12 @@
 		generatedMarkdown = marked(inputText)
 		tags = note?.tags ?? []
 
-		// if neither EDIT or PREVIEW is open, set to both
-		if (!(displayState & Display.PREVIEW) && !(displayState & Display.EDITOR)) {
+		// if there IS a note, but neither EDIT or PREVIEW is open, set to both
+		if(
+			note
+			&& !(displayState & Display.PREVIEW)
+			&& !(displayState & Display.EDITOR)
+		){
 			displayState = Display.PREVIEW + Display.EDITOR
 		}
 

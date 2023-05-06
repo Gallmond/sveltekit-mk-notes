@@ -1,4 +1,8 @@
 {
+	"hosting": {
+		"cleanUrls": true,
+		"public": "build"
+	},
 	"firestore": {
 		"rules": "firestore.rules",
 		"indexes": "firestore.indexes.json"
