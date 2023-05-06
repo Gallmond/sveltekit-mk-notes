@@ -2,6 +2,11 @@
 
 A simple static web app for editing / reading notes in markdown.
 
+Live version <a href="https://svelte-notes-44166.web.app/" target="_blank">here</a>
+
+nb: registered email address and note text are not encrypted. Don't put anything
+sensitive in this project.
+
 # About
 
 Notes are rendered in realtime and with toggle-able edit / read panels.
