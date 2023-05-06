@@ -55,13 +55,13 @@
 			<p class="date-container">{date}</p>
 		</div>
 
-		<div class="bit">
+		<div class="bit bottom-bit">
 			<div class="icons">
+				<LightButton on:click={noteClicked}>Open</LightButton>
+				<LightButton on:click={deleteClicked}>🗑️</LightButton>
 				{#if pinned}
 					<LightButton on:click={pinClicked}>📌</LightButton>
 				{/if}
-				<LightButton on:click={deleteClicked}>🗑️</LightButton>
-				<LightButton on:click={noteClicked}>Open</LightButton>
 			</div>
 			<div class="tags-container">
 				{#each tags as tag, i}
@@ -80,6 +80,7 @@
 	.tags-container {
 		display: flex;
 		flex-direction: row;
+		flex-wrap: wrap;
 	}
 
 	.date-container {
@@ -107,6 +108,9 @@
 	.bit > p,
 	.bit > div {
 		width: fit-content;
+	}
+	.bottom-bit {
+		flex-direction: column;
 	}
 
 	.list-item:nth-child(1) {

@@ -50,6 +50,18 @@
 		}
 	})
 
+	let parser: DOMParser | null = null
+	const getParser = (): DOMParser => {
+		if (parser === null) {
+			throw new Error('DOMParser not initialised')
+		}
+
+		return parser
+	}
+	onMount(() => {
+		parser = new DOMParser()
+	})
+
 	/**
 	 * When the component's note changes, set the input text and generated
 	 * markdown
@@ -80,7 +92,6 @@
 		generatedMarkdown = marked(inputText)
 		initiateSave()
 	}
-	const parser = new DOMParser()
 	const initiateSave = () => {
 		debounce(
 			'save',
@@ -89,7 +100,7 @@
 
 				note.content = inputText
 
-				note.title = getNoteTitle(parser, note, generatedMarkdown)
+				note.title = getNoteTitle(getParser(), note, generatedMarkdown)
 
 				dispatchContentChanged('noteContentChanged', { note })
 			},

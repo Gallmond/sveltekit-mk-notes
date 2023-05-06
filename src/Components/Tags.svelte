@@ -27,17 +27,26 @@
 
 		onChange(tags)
 	}
+
+	const handleNewTag = () => {
+		if (newTagInput === '') return
+		addTag(newTagInput)
+		newTagInput = ''
+	}
+
+	const handleKeydown = (event: KeyboardEvent) => {
+		if (event.key === 'Enter') {
+			handleNewTag()
+		}
+	}
 </script>
 
 <div class="utility-item">
 	<SmallInput
 		label={'add'}
 		bind:value={newTagInput}
-		on:click={() => {
-			if (newTagInput === '') return
-			addTag(newTagInput)
-			newTagInput = ''
-		}}
+		on:keydown={handleKeydown}
+		on:click={handleNewTag}
 	/>
 </div>
 <div class="utility-item">

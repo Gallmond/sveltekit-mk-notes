@@ -12,6 +12,7 @@
 		aria-label="Sizing example input"
 		aria-describedby="inputGroup-sizing-sm"
 		bind:value
+		on:keydown
 	/>
 	<LightButton on:click>{label}</LightButton>
 </div>
